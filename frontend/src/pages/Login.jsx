@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
@@ -20,14 +20,12 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
-  HelpCircle,
-  X,
   Sun,
   Moon
 } from 'lucide-react';
 
 const Login = ({ initialRole = 'student' }) => {
-  const { login, logout } = useAuth();
+  const { login } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialRole); // 'student' | 'staff' | 'admin'
@@ -39,7 +37,7 @@ const Login = ({ initialRole = 'student' }) => {
   const [newPassword, setNewPassword] = useState('');
   const [isSendingReset, setIsSendingReset] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: {
       email: '',
       password: '',
@@ -48,25 +46,6 @@ const Login = ({ initialRole = 'student' }) => {
   });
 
   const emailValue = watch('email');
-
-  // Default email and password are empty unless demo buttons are clicked
-  useEffect(() => {
-    // Keep fields empty by default
-  }, []);
-
-  // Demo accounts helper
-  const demoAccounts = {
-    student: { email: 'student@campus.com', pass: 'Password123', label: 'Student Demo' },
-    staff: { email: 'staff@campus.com', pass: 'Password123', label: 'Staff Demo' },
-    admin: { email: 'admin@campus.com', pass: 'Password123', label: 'Admin Demo' }
-  };
-
-  const handleQuickFill = (roleKey) => {
-    setActiveTab(roleKey);
-    setValue('email', demoAccounts[roleKey].email, { shouldValidate: true });
-    setValue('password', demoAccounts[roleKey].pass, { shouldValidate: true });
-    toast.info(`Pre-filled ${demoAccounts[roleKey].label} credentials!`, { autoClose: 2000 });
-  };
 
   const onSubmit = async (data) => {
     setIsSubmittingState(true);
@@ -122,8 +101,6 @@ const Login = ({ initialRole = 'student' }) => {
       if (res.success) {
         toast.success(res.message || 'Password reset successfully! You can now log in with your new password.');
         setIsForgotPasswordOpen(false);
-        setValue('email', forgotEmail);
-        setValue('password', newPassword);
         setForgotEmail('');
         setNewPassword('');
       } else {
@@ -144,7 +121,10 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-blue-600 to-indigo-600',
       badge: 'bg-blue-50 text-blue-700 border-blue-200',
       btnColor: 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20',
-      emailPlaceholder: 'Enter your email address'
+      btnText: 'Sign In to Student',
+      emailPlaceholder: 'Enter your student email',
+      passwordPlaceholder: 'Enter your password',
+      footerInfo: null
     },
     staff: {
       title: 'Staff Maintenance Console',
@@ -153,7 +133,10 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-violet-600 to-purple-600',
       badge: 'bg-purple-50 text-purple-700 border-purple-200',
       btnColor: 'bg-purple-600 hover:bg-purple-700 shadow-purple-500/20',
-      emailPlaceholder: 'Enter your email address'
+      btnText: 'Sign In to Staff',
+      emailPlaceholder: 'Enter your staff email',
+      passwordPlaceholder: 'Enter your password',
+      footerInfo: 'Staff accounts are created by the Campus Administration.'
     },
     admin: {
       title: 'Admin Command Center',
@@ -162,7 +145,10 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-slate-800 to-indigo-900',
       badge: 'bg-slate-100 text-slate-800 border-slate-300',
       btnColor: 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20',
-      emailPlaceholder: 'Enter your email address'
+      btnText: 'Sign In to Admin',
+      emailPlaceholder: 'Enter admin email',
+      passwordPlaceholder: 'Enter admin password',
+      footerInfo: 'Administrator accounts are managed by the system owner.'
     }
   };
 
@@ -256,10 +242,10 @@ const Login = ({ initialRole = 'student' }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-                    Welcome Back
+                    {currentRole.title}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                    Select your portal role to continue
+                    {currentRole.subtitle}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -306,40 +292,10 @@ const Login = ({ initialRole = 'student' }) => {
               </div>
             </div>
 
-            {/* Quick Demo Credentials Bar */}
-            <div className="mb-6 p-3 bg-slate-50/90 dark:bg-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Quick Demo Fill
-                </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Click to populate fields</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { key: 'student', name: 'Student Demo' },
-                  { key: 'staff', name: 'Staff Demo' },
-                  { key: 'admin', name: 'Admin Demo' }
-                ].map((demo) => (
-                  <button
-                    key={demo.key}
-                    type="button"
-                    onClick={() => handleQuickFill(demo.key)}
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
-                      activeTab === demo.key
-                        ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-800 font-bold'
-                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    ⚡ {demo.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Main Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
               
-              {/* Email Input with Dynamic Letter Typing Color Shift */}
+              {/* Email Input */}
               <ColorChangingEmailInput
                 value={emailValue}
                 placeholder={currentRole.emailPlaceholder}
@@ -373,7 +329,7 @@ const Login = ({ initialRole = 'student' }) => {
                   </span>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder={currentRole.passwordPlaceholder}
                     className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
                       errors.password ? 'border-red-400 focus:ring-red-500/10' : 'border-slate-300 dark:border-slate-700'
                     }`}
@@ -420,7 +376,7 @@ const Login = ({ initialRole = 'student' }) => {
                   </>
                 ) : (
                   <>
-                    <span>Sign In to {currentRole.title.split(' ')[0]}</span>
+                    <span>{currentRole.btnText}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -433,22 +389,20 @@ const Login = ({ initialRole = 'student' }) => {
           <div className="pt-4 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2 font-semibold">
             {activeTab === 'student' ? (
               <div>
-                New student?{' '}
+                New Student?{' '}
                 <Link to="/register" className="text-blue-600 font-extrabold hover:underline">
                   Create Account
                 </Link>
               </div>
             ) : (
               <div className="text-slate-400 font-medium">
-                {activeTab === 'admin' 
-                  ? 'Administrator accounts are managed by the System Administrator.' 
-                  : 'Staff accounts are created by Campus Management.'}
+                {currentRole.footerInfo}
               </div>
             )}
             <div>
               Back to{' '}
-              <Link to="/" className="text-slate-700 font-extrabold hover:underline">
-                Home Page
+              <Link to="/" className="text-slate-700 dark:text-slate-300 font-extrabold hover:underline">
+                Home
               </Link>
             </div>
           </div>
@@ -458,82 +412,57 @@ const Login = ({ initialRole = 'student' }) => {
       </motion.div>
 
       {/* Forgot Password Modal */}
-      <AnimatePresence>
-        {isForgotPasswordOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-4 relative"
-            >
-              <button
-                onClick={() => setIsForgotPasswordOpen(false)}
-                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                <X className="h-5 w-5" />
-              </button>
-
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl">
-                  <HelpCircle className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Reset Password</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Enter your campus email and set your new password</p>
-                </div>
+      {isForgotPasswordOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 text-left">
+            <h3 className="text-lg font-black text-slate-800 dark:text-slate-100">Reset Password</h3>
+            <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col gap-3 text-xs font-semibold">
+              <div>
+                <label className="text-slate-500 uppercase text-[10px] font-bold">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your registered email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-2.5 text-slate-900 dark:text-white"
+                />
               </div>
-
-              <form onSubmit={handleForgotPasswordSubmit} className="flex flex-col gap-3 mt-2">
-                <div className="flex flex-col gap-1 text-left">
-                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Campus Email</label>
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="your-email@campus.com"
-                    required
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 text-left">
-                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">New Password</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimum 6 characters"
-                    required
-                    minLength={6}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <div className="flex gap-2 justify-end mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPasswordOpen(false)}
-                    className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSendingReset}
-                    className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-1.5"
-                  >
-                    {isSendingReset ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Update Password'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+              <div>
+                <label className="text-slate-500 uppercase text-[10px] font-bold">New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-2.5 text-slate-900 dark:text-white"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPasswordOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSendingReset}
+                  className="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold"
+                >
+                  {isSendingReset ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
-      {/* Floating AI Smart Assistant Widget */}
+      {/* Interactive AI Floating Widget */}
       <AIAssistantWidget />
+
     </div>
   );
 };
