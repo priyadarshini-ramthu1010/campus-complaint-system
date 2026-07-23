@@ -122,7 +122,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <StudentLayout>
-                    <StudentSettings />
+                    <StudentProfile />
                   </StudentLayout>
                 </ProtectedRoute>
               } 
