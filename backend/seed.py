@@ -108,30 +108,32 @@ def seed_database(target_db=None):
     users_col.insert_one(chandana_doc)
     print("Seeded Admin: chandana@gmail.com")
 
-    # Seed 8 Maintenance Staff with realistic names
+    # Seed 9 Maintenance Staff with realistic names
     staff_depts = [
-        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff.electrical@campus.com"),
-        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff.plumbing@campus.com"),
-        ("Amit Verma (Network & IT Specialist)", "IT Infrastructure", "Internet", "staff.it@campus.com"),
-        ("Venkatesh Rao (Carpentry & Locks Specialist)", "Carpentry & Furniture", "Furniture", "staff.carpentry@campus.com"),
-        ("Ramesh Patel (HVAC & AC Technician)", "HVAC / AC Maintenance", "AC/Cooling", "staff.hvac@campus.com"),
-        ("Manoj Singh (Housekeeping Supervisor)", "Housekeeping & Sanitation", "Cleaning", "staff.cleaning@campus.com"),
-        ("Praveen Kumar (Civil & Painting Engineer)", "Civil Works", "Other", "staff.civil@campus.com"),
-        ("Anil Saxena (Water Supply & Sanitation)", "Water Supply", "Plumbing", "staff.sanitation@campus.com")
+        ("Senior Maintenance Staff", "General Maintenance", "General", "staff@gmail.com", "Staff@1"),
+        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff.electrical@campus.com", "Password123"),
+        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff.plumbing@campus.com", "Password123"),
+        ("Amit Verma (Network & IT Specialist)", "IT Infrastructure", "Internet", "staff.it@campus.com", "Password123"),
+        ("Venkatesh Rao (Carpentry & Locks Specialist)", "Carpentry & Furniture", "Furniture", "staff.carpentry@campus.com", "Password123"),
+        ("Ramesh Patel (HVAC & AC Technician)", "HVAC / AC Maintenance", "AC/Cooling", "staff.hvac@campus.com", "Password123"),
+        ("Manoj Singh (Housekeeping Supervisor)", "Housekeeping & Sanitation", "Cleaning", "staff.cleaning@campus.com", "Password123"),
+        ("Praveen Kumar (Civil & Painting Engineer)", "Civil Works", "Other", "staff.civil@campus.com", "Password123"),
+        ("Anil Saxena (Water Supply & Sanitation)", "Water Supply", "Plumbing", "staff.sanitation@campus.com", "Password123")
     ]
     staff_ids = []
     staff_docs = []
-    for idx, (staff_name, dept_name, cat, email) in enumerate(staff_depts):
+    for idx, (staff_name, dept_name, cat, email, pwd_plain) in enumerate(staff_depts):
         num = idx + 1
+        staff_pwd = bcrypt.hashpw(pwd_plain.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         staff_doc = {
             "name": staff_name,
-            # roll_number is completely omitted for Staff
             "email": email,
-            "password": hashed_pw,
+            "password": staff_pwd,
             "phone": f"987654321{num}",
             "department": dept_name,
             "year": "N/A",
             "role": "staff",
+            "employee_id": f"STF-{num:03d}",
             "profile_image": "",
             "created_at": datetime.datetime.now(datetime.UTC),
             "updated_at": datetime.datetime.now(datetime.UTC),
