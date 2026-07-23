@@ -111,7 +111,7 @@ const ManagementLogin = () => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', duration: 0.6, bounce: 0.15 }}
-        className="w-full max-w-md bg-[#0B0F19]/95 text-slate-100 rounded-3xl p-8 border border-slate-800 shadow-2xl flex flex-col gap-6 backdrop-blur-xl"
+        className="w-full max-w-md bg-slate-950/85 text-slate-100 rounded-3xl p-8 border border-white/10 shadow-2xl flex flex-col gap-6 backdrop-blur-2xl"
       >
         {/* Header */}
         <div className="relative text-center flex flex-col items-center gap-3">

@@ -50,15 +50,14 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        {/* Background Overlay Layer */}
-        <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none select-none bg-[#14192d]">
+        {/* Crisp & Visible Campus Background Image Layer */}
+        <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none select-none bg-slate-950">
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-100 transition-all duration-500 opacity-30" 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500 opacity-95 filter brightness-105 contrast-105" 
             style={{ backgroundImage: `url('/campus-bg.png')` }}
           />
           <div 
-            className="absolute inset-0" 
-            style={{ backgroundColor: 'rgba(20, 25, 45, 0.72)' }} 
+            className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-900/15 to-slate-950/50" 
           />
         </div>
 
