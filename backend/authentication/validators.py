@@ -3,6 +3,7 @@ import re
 def validate_registration_data(data):
     """
     Validates input fields for a student registration request.
+    Enforces strict Gmail and Strong Password rules while gracefully defaulting optional fields.
     Returns: (is_valid, errors_dict)
     """
     if not isinstance(data, dict):
@@ -14,8 +15,6 @@ def validate_registration_data(data):
     email = str(data.get("email") or "").strip().lower()
     password = str(data.get("password") or "")
     phone = str(data.get("phone") or "").strip()
-    department = str(data.get("department") or "").strip()
-    year = str(data.get("year") or "").strip()
 
     if not name:
         errors["name"] = "Name is required"
@@ -24,29 +23,22 @@ def validate_registration_data(data):
 
     if not email:
         errors["email"] = "Email is required"
-    elif not re.match(r"^[\w\.\+-]+@[\w\.-]+\.\w+$", email):
-        errors["email"] = "Invalid email address format"
+    elif not re.match(r"^[a-zA-Z0-9._%+-]+@gmail\.com$", email):
+        errors["email"] = "Please enter a valid Gmail address ending with @gmail.com"
 
     if roll_number and len(roll_number) < 2:
         errors["roll_number"] = "Roll number must be at least 2 characters"
 
     if not password:
         errors["password"] = "Password is required"
-    elif len(password) < 6:
-        errors["password"] = "Password must be at least 6 characters long"
+    elif not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\?.,])[A-Za-z\d!@#$%^&*()_+\-=\?.,]{8,20}$", password):
+        errors["password"] = "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character."
 
-    if not phone:
-        errors["phone"] = "Phone number is required"
-    elif not re.match(r"^\+?1?\d{9,15}$", phone):
+    if phone and not re.match(r"^\+?1?\d{9,15}$", phone):
         errors["phone"] = "Invalid phone number format"
 
-    if not department:
-        errors["department"] = "Department is required"
-
-    if not year:
-        errors["year"] = "Year of study is required"
-
     return len(errors) == 0, errors
+
 
 def validate_login_data(data):
     """
@@ -62,8 +54,8 @@ def validate_login_data(data):
 
     if not email:
         errors["email"] = "Email is required"
-    elif not re.match(r"^[\w\.\+-]+@[\w\.-]+\.\w+$", email):
-        errors["email"] = "Invalid email address format"
+    elif not re.match(r"^[a-zA-Z0-9._%+-]+@gmail\.com$", email):
+        errors["email"] = "Please enter a valid Gmail address."
 
     if not password:
         errors["password"] = "Password is required"

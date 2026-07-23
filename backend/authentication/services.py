@@ -48,20 +48,20 @@ class AuthService:
     @staticmethod
     def create_student_user(name, roll_number, email, plain_password, phone, department, year):
         """
-        Inserts a new student user document into MongoDB Atlas.
+        Inserts a new student user document into MongoDB Atlas safely.
         """
         users_col = get_collection("users")
-        hashed_pw = AuthService.hash_password(plain_password)
+        hashed_pw = AuthService.hash_password(plain_password or "")
         now = datetime.now(timezone.utc)
 
         new_user = {
-            "name": name.strip(),
-            "roll_number": roll_number.strip().upper(),
-            "email": email.strip().lower(),
+            "name": (name or "").strip(),
+            "roll_number": (roll_number or "").strip().upper(),
+            "email": (email or "").strip().lower(),
             "password": hashed_pw,
-            "phone": phone.strip(),
-            "department": department.strip(),
-            "year": year.strip(),
+            "phone": (phone or "").strip(),
+            "department": (department or "").strip() or "Computer Science",
+            "year": (year or "").strip() or "1st Year",
             "role": "student",
             "profile_image": "",
             "created_at": now,
