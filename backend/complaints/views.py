@@ -403,3 +403,153 @@ class AIChatAssistantView(APIView):
             status_code=status.HTTP_200_OK
         )
 
+
+class AssignedComplaintsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "staff":
+            return standard_error_response(
+                message="Forbidden. Only staff members can access assigned complaints.",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            result = ComplaintService.list_complaints(
+                user_id=request.user.id,
+                user_role="staff",
+                page=int(request.query_params.get("page", 1)),
+                limit=int(request.query_params.get("limit", 100))
+            )
+            return standard_success_response(
+                message="Assigned complaints retrieved successfully",
+                data=result,
+                status_code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return standard_error_response(
+                message=f"Failed to fetch assigned complaints: {str(e)}",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class NotificationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk=None):
+        from db_connection import get_collection
+        from bson import ObjectId
+        notif_col = get_collection("notifications")
+
+        user_id = pk or request.user.id
+        try:
+            u_oid = ObjectId(str(user_id))
+        except Exception:
+            u_oid = user_id
+
+        try:
+            query = {"$or": [{"user_id": u_oid}, {"user_id": str(user_id)}]}
+            cursor = notif_col.find(query).sort("created_at", -1).limit(50)
+            notifications = []
+            unread_count = 0
+            for doc in cursor:
+                doc["id"] = str(doc["_id"])
+                doc["_id"] = str(doc["_id"])
+                doc["user_id"] = str(doc["user_id"])
+                if doc.get("complaint_id"):
+                    doc["complaint_id"] = str(doc["complaint_id"])
+                if doc.get("created_at") and hasattr(doc["created_at"], "isoformat"):
+                    doc["created_at"] = doc["created_at"].isoformat()
+                elif doc.get("created_at") and isinstance(doc["created_at"], str):
+                    pass
+                if not doc.get("is_read"):
+                    unread_count += 1
+                notifications.append(doc)
+
+            return standard_success_response(
+                message="Notifications retrieved successfully",
+                data={
+                    "notifications": notifications,
+                    "unread_count": unread_count
+                },
+                status_code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return standard_error_response(
+                message=f"Failed to fetch notifications: {str(e)}",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request):
+        from db_connection import get_collection
+        from bson import ObjectId
+        import datetime
+
+        data = request.data
+        user_id = data.get("user_id") or data.get("userId")
+        if not user_id:
+            return standard_error_response(message="userId is required", status_code=status.HTTP_400_BAD_REQUEST)
+
+        notif_col = get_collection("notifications")
+        now = datetime.datetime.utcnow()
+
+        try:
+            u_oid = ObjectId(str(user_id))
+        except Exception:
+            u_oid = user_id
+
+        c_id = data.get("complaint_id") or data.get("complaintId")
+        try:
+            c_oid = ObjectId(str(c_id)) if c_id else None
+        except Exception:
+            c_oid = c_id
+
+        doc = {
+            "user_id": u_oid,
+            "role": data.get("role", "student"),
+            "title": data.get("title", "System Notification"),
+            "message": data.get("message", ""),
+            "complaint_id": c_oid,
+            "is_read": False,
+            "created_at": now
+        }
+        res = notif_col.insert_one(doc)
+        doc["id"] = str(res.inserted_id)
+        doc["_id"] = str(res.inserted_id)
+        doc["user_id"] = str(doc["user_id"])
+
+        return standard_success_response(message="Notification created", data={"notification": doc}, status_code=status.HTTP_201_CREATED)
+
+
+class NotificationReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        from db_connection import get_collection
+        from bson import ObjectId
+        notif_col = get_collection("notifications")
+
+        try:
+            n_oid = ObjectId(str(pk))
+        except Exception:
+            n_oid = pk
+
+        notif_col.update_one({"_id": n_oid}, {"$set": {"is_read": True}})
+        return standard_success_response(message="Notification marked as read", status_code=status.HTTP_200_OK)
+
+
+class NotificationMarkAllReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        from db_connection import get_collection
+        from bson import ObjectId
+        notif_col = get_collection("notifications")
+
+        try:
+            u_oid = ObjectId(str(request.user.id))
+        except Exception:
+            u_oid = request.user.id
+
+        notif_col.update_many({"user_id": u_oid}, {"$set": {"is_read": True}})
+        return standard_success_response(message="All notifications marked as read", status_code=status.HTTP_200_OK)

@@ -273,11 +273,12 @@ class ComplaintService:
     @staticmethod
     def assign_staff(complaint_id, staff_id, remarks, admin_id, admin_name):
         """
-        Assigns a staff member to a complaint and updates the audit log.
+        Assigns a staff member to a complaint and updates audit log & staff notification.
         """
         complaints_col = get_collection("complaints")
         users_col = get_collection("users")
         history_col = get_collection("status_history")
+        notif_col = get_collection("notifications")
 
         complaint_oid = to_object_id(complaint_id)
         staff_oid = to_object_id(staff_id)
@@ -301,6 +302,8 @@ class ComplaintService:
                     "$set": {
                         "assigned_staff_id": staff_oid,
                         "assigned_staff_name": staff.get("name", ""),
+                        "assigned_date": now,
+                        "assigned_by": admin_name,
                         "status": "Assigned",
                         "updated_at": now,
                         "updated_by": admin_oid
@@ -308,7 +311,7 @@ class ComplaintService:
                 }
             )
 
-            # Insert history
+            # Insert status history
             history_col.insert_one({
                 "complaint_id": complaint_oid,
                 "status": "Assigned",
@@ -318,17 +321,50 @@ class ComplaintService:
                 "updated_at": now
             })
 
+            # Create Notification for Staff
+            c_num = complaint.get("complaint_number") or complaint_id
+            notif_col.insert_one({
+                "user_id": staff_oid,
+                "role": "staff",
+                "title": "New Complaint Assigned",
+                "message": f"You have been assigned Complaint {c_num}.",
+                "complaint_id": complaint_oid,
+                "complaint_number": c_num,
+                "complaint_title": complaint.get("title", ""),
+                "location": f"{complaint.get('building', '')} Room {complaint.get('room_number', 'N/A')}",
+                "priority": complaint.get("priority", "Normal"),
+                "assigned_by": admin_name,
+                "assigned_time": now.isoformat(),
+                "is_read": False,
+                "created_at": now
+            })
+
+            # Create Notification for Student
+            student_oid = complaint.get("student_id")
+            if student_oid:
+                notif_col.insert_one({
+                    "user_id": student_oid,
+                    "role": "student",
+                    "title": "Complaint Assigned to Staff",
+                    "message": f"Your complaint ({c_num}) has been assigned to technician {staff.get('name')}.",
+                    "complaint_id": complaint_oid,
+                    "complaint_number": c_num,
+                    "is_read": False,
+                    "created_at": now
+                })
+
             return True, "Staff assigned successfully"
         except Exception as e:
             return False, str(e)
 
     @staticmethod
-    def update_status(complaint_id, new_status, remarks, user_id, user_name, user_role, resolution_images=None):
+    def update_status(complaint_id, new_status, remarks, user_id, user_name, user_role, resolution_images=None, before_image=None, after_image=None):
         """
-        Updates the status of a complaint and appends an entry to status history.
+        Updates the status of a complaint, appends an entry to status history, and notifies the student.
         """
         complaints_col = get_collection("complaints")
         history_col = get_collection("status_history")
+        notif_col = get_collection("notifications")
 
         complaint_oid = to_object_id(complaint_id)
         u_oid = to_object_id(user_id)
@@ -346,17 +382,24 @@ class ComplaintService:
         now = datetime.datetime.utcnow()
         update_data = {
             "status": new_status,
+            "remarks": remarks,
             "updated_at": now,
             "updated_by": u_oid
         }
 
+        if before_image:
+            update_data["before_image"] = before_image
+        if after_image:
+            update_data["after_image"] = after_image
+
         # Resolution details
-        if new_status == "Resolved":
+        if new_status in ["Resolved", "Completed"]:
+            update_data["status"] = "Resolved"
+            new_status = "Resolved"
             update_data["resolution_notes"] = remarks
             update_data["resolution_date"] = now
             update_data["resolved_by"] = u_oid
             if resolution_images:
-                # Add resolution images to complaints images array
                 update_data["images"] = complaint.get("images", []) + resolution_images
 
         try:
@@ -371,6 +414,21 @@ class ComplaintService:
                 "updated_by_name": user_name,
                 "updated_at": now
             })
+
+            # Create Notification for Student
+            student_oid = complaint.get("student_id")
+            c_num = complaint.get("complaint_number") or complaint_id
+            if student_oid:
+                notif_col.insert_one({
+                    "user_id": student_oid,
+                    "role": "student",
+                    "title": f"Complaint Status: {new_status}",
+                    "message": f"Your complaint ({c_num}) status has been updated to {new_status}.",
+                    "complaint_id": complaint_oid,
+                    "complaint_number": c_num,
+                    "is_read": False,
+                    "created_at": now
+                })
 
             return True, f"Status updated to {new_status}"
         except Exception as e:
