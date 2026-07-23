@@ -108,14 +108,16 @@ def seed_database(target_db=None):
     users_col.insert_one(chandana_doc)
     print("Seeded Admin: chandana@gmail.com")
 
-    # Seed 6 Maintenance Staff with realistic names
+    # Seed 8 Maintenance Staff with realistic names
     staff_depts = [
-        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff@campus.com"),
-        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff2@campus.com"),
-        ("Anita Verma (IT & Network Tech)", "Network Support", "Internet", "staff3@campus.com"),
-        ("Vikram Singh (Carpentry Specialist)", "Furniture & Carpentry", "Furniture", "staff4@campus.com"),
-        ("Ramesh Patel (Sanitation Lead)", "Sanitation & Cleaning", "Cleaning", "staff5@campus.com"),
-        ("Deepak Verma (HVAC & AC Tech)", "HVAC & Cooling", "Electrical", "staff6@campus.com")
+        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff.electrical@campus.com"),
+        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff.plumbing@campus.com"),
+        ("Amit Verma (Network & IT Specialist)", "IT Infrastructure", "Internet", "staff.it@campus.com"),
+        ("Venkatesh Rao (Carpentry & Locks Specialist)", "Carpentry & Furniture", "Furniture", "staff.carpentry@campus.com"),
+        ("Ramesh Patel (HVAC & AC Technician)", "HVAC / AC Maintenance", "AC/Cooling", "staff.hvac@campus.com"),
+        ("Manoj Singh (Housekeeping Supervisor)", "Housekeeping & Sanitation", "Cleaning", "staff.cleaning@campus.com"),
+        ("Praveen Kumar (Civil & Painting Engineer)", "Civil Works", "Other", "staff.civil@campus.com"),
+        ("Anil Saxena (Water Supply & Sanitation)", "Water Supply", "Plumbing", "staff.sanitation@campus.com")
     ]
     staff_ids = []
     staff_docs = []
