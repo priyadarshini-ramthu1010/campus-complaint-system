@@ -105,16 +105,16 @@ class LoginView(APIView):
         user = AuthService.get_user_by_email(email)
         if not user:
             return standard_error_response(
-                message="Authentication failed",
-                errors={"non_field_errors": "Invalid email or password"},
-                status_code=status.HTTP_401_UNAUTHORIZED
+                message="User not found",
+                errors={"email": "User not found"},
+                status_code=status.HTTP_404_NOT_FOUND
             )
 
         if not AuthService.verify_password(password, user.get("password", "")):
             return standard_error_response(
-                message="Authentication failed",
-                errors={"non_field_errors": "Invalid email or password"},
-                status_code=status.HTTP_401_UNAUTHORIZED
+                message="Invalid password",
+                errors={"password": "Invalid password"},
+                status_code=status.HTTP_400_BAD_REQUEST
             )
 
         # Strict role restriction check
@@ -123,17 +123,20 @@ class LoginView(APIView):
             user_role = user.get("role", "student")
             if expected_role == "student" and user_role != "student":
                 return standard_error_response(
-                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Student Portal allows only Student accounts.",
+                    message="This account is not registered as Student",
+                    errors={"role": "This account is not registered as Student"},
                     status_code=status.HTTP_403_FORBIDDEN
                 )
             elif expected_role == "staff" and user_role != "staff":
                 return standard_error_response(
-                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Staff Console allows only Staff accounts.",
+                    message="This account is not registered as Staff",
+                    errors={"role": "This account is not registered as Staff"},
                     status_code=status.HTTP_403_FORBIDDEN
                 )
             elif expected_role == "admin" and user_role not in ["admin", "super_admin"]:
                 return standard_error_response(
-                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Admin Command Center allows only Admin accounts.",
+                    message="This account is not registered as Admin",
+                    errors={"role": "This account is not registered as Admin"},
                     status_code=status.HTTP_403_FORBIDDEN
                 )
 
@@ -187,6 +190,32 @@ class ProfileView(APIView):
         }
         return standard_success_response(
             message="Profile retrieved successfully",
+            data=user_data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        user_data = {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "roll_number": user.roll_number,
+            "employee_id": getattr(user, "employee_id", ""),
+            "department": user.department,
+            "year": user.year,
+            "phone": user.phone,
+            "status": getattr(user, "status", "active"),
+            "profile_image": getattr(user, "profile_image", ""),
+            "notifications": getattr(user, "notifications", {"email": True, "sms": False, "in_app": True})
+        }
+        return standard_success_response(
+            message="User session verified",
             data=user_data,
             status_code=status.HTTP_200_OK
         )

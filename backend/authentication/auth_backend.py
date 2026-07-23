@@ -80,17 +80,7 @@ class MongoJWTAuthentication(BaseAuthentication):
             user_doc = None
 
         if not user_doc:
-            fallback_doc = {
-                "_id": user_id or "65f123456789abcdef000001",
-                "name": payload.get("name", "Student Scholar"),
-                "email": payload.get("email", "student@campus.com"),
-                "role": payload.get("role", "student"),
-                "roll_number": payload.get("roll_number", "STU-2026-0001"),
-                "department": payload.get("department", "Computer Science"),
-                "year": payload.get("year", "3rd Year"),
-                "phone": payload.get("phone", "9876543210")
-            }
-            return (MongoUser(fallback_doc), token)
+            return None
 
         user = MongoUser(user_doc)
         return (user, token)
