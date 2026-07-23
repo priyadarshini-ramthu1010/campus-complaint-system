@@ -42,8 +42,8 @@ def seed_database(target_db=None):
     # Seed Admins
     admin_doc = {
         "name": "Campus Administrator",
-        "email": "admin@campus.com",
-        "password": hashed_pw,
+        "email": "admin@gmail.com",
+        "password": AuthService.hash_password("Admin@1234"),
         "phone": "9876543210",
         "department": "Administration",
         "year": "N/A",
@@ -55,24 +55,7 @@ def seed_database(target_db=None):
         "updated_by": None
     }
     admin_id = users_col.insert_one(admin_doc).inserted_id
-    print("Seeded Admin: admin@campus.com")
-
-    admin2_doc = {
-        "name": "Senior System Administrator",
-        "email": "admin2@campus.com",
-        "password": AuthService.hash_password("AdminPassword123"),
-        "phone": "9876543210",
-        "department": "Campus Administration",
-        "year": "N/A",
-        "role": "admin",
-        "profile_image": "",
-        "created_at": datetime.datetime.now(datetime.UTC),
-        "updated_at": datetime.datetime.now(datetime.UTC),
-        "created_by": None,
-        "updated_by": None
-    }
-    users_col.insert_one(admin2_doc)
-    print("Seeded Admin 2: admin2@campus.com")
+    print("Seeded Admin: admin@gmail.com")
 
     priya_doc = {
         "name": "Priyadarshini Ramthu",
@@ -111,14 +94,14 @@ def seed_database(target_db=None):
     # Seed 9 Maintenance Staff with realistic names
     staff_depts = [
         ("Senior Maintenance Staff", "General Maintenance", "General", "staff@gmail.com", "Staff@1234"),
-        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff.electrical@campus.com", "Staff@1234"),
-        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff.plumbing@campus.com", "Staff@1234"),
-        ("Amit Verma (Network & IT Specialist)", "IT Infrastructure", "Internet", "staff.it@campus.com", "Staff@1234"),
-        ("Venkatesh Rao (Carpentry & Locks Specialist)", "Carpentry & Furniture", "Furniture", "staff.carpentry@campus.com", "Staff@1234"),
-        ("Ramesh Patel (HVAC & AC Technician)", "HVAC / AC Maintenance", "AC/Cooling", "staff.hvac@campus.com", "Staff@1234"),
-        ("Manoj Singh (Housekeeping Supervisor)", "Housekeeping & Sanitation", "Cleaning", "staff.cleaning@campus.com", "Staff@1234"),
-        ("Praveen Kumar (Civil & Painting Engineer)", "Civil Works", "Other", "staff.civil@campus.com", "Staff@1234"),
-        ("Anil Saxena (Water Supply & Sanitation)", "Water Supply", "Plumbing", "staff.sanitation@campus.com", "Staff@1234")
+        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff.electrical@gmail.com", "Staff@1234"),
+        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff.plumbing@gmail.com", "Staff@1234"),
+        ("Amit Verma (Network & IT Specialist)", "IT Infrastructure", "Internet", "staff.it@gmail.com", "Staff@1234"),
+        ("Venkatesh Rao (Carpentry & Locks Specialist)", "Carpentry & Furniture", "Furniture", "staff.carpentry@gmail.com", "Staff@1234"),
+        ("Ramesh Patel (HVAC & AC Technician)", "HVAC / AC Maintenance", "AC/Cooling", "staff.hvac@gmail.com", "Staff@1234"),
+        ("Manoj Singh (Housekeeping Supervisor)", "Housekeeping & Sanitation", "Cleaning", "staff.cleaning@gmail.com", "Staff@1234"),
+        ("Praveen Kumar (Civil & Painting Engineer)", "Civil Works", "Other", "staff.civil@gmail.com", "Staff@1234"),
+        ("Anil Saxena (Water Supply & Sanitation)", "Water Supply", "Plumbing", "staff.sanitation@gmail.com", "Staff@1234")
     ]
     staff_ids = []
     staff_docs = []
