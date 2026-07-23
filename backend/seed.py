@@ -39,10 +39,9 @@ def seed_database(target_db=None):
     password_plain = "Password123"
     hashed_pw = bcrypt.hashpw(password_plain.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    # Seed 1 Admin
+    # Seed Admins
     admin_doc = {
         "name": "Campus Administrator",
-        # roll_number is completely omitted for Admin
         "email": "admin@campus.com",
         "password": hashed_pw,
         "phone": "9876543210",
@@ -57,6 +56,23 @@ def seed_database(target_db=None):
     }
     admin_id = users_col.insert_one(admin_doc).inserted_id
     print("Seeded Admin: admin@campus.com")
+
+    admin2_doc = {
+        "name": "Senior System Administrator",
+        "email": "admin2@campus.com",
+        "password": AuthService.hash_password("AdminPassword123"),
+        "phone": "9876543210",
+        "department": "Campus Administration",
+        "year": "N/A",
+        "role": "admin",
+        "profile_image": "",
+        "created_at": datetime.datetime.now(datetime.UTC),
+        "updated_at": datetime.datetime.now(datetime.UTC),
+        "created_by": None,
+        "updated_by": None
+    }
+    users_col.insert_one(admin2_doc)
+    print("Seeded Admin 2: admin2@campus.com")
 
     # Seed 6 Maintenance Staff with realistic names
     staff_depts = [
