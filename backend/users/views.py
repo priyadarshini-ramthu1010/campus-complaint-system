@@ -93,9 +93,9 @@ class AdminManagementView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        if request.user.role != "super_admin":
+        if request.user.role not in ["admin", "super_admin"]:
             return standard_error_response(
-                message="Forbidden. Only Super Admin can access Admin Management.",
+                message="Forbidden. Admin permission required.",
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
@@ -113,9 +113,9 @@ class AdminManagementView(APIView):
             )
 
     def post(self, request):
-        if request.user.role != "super_admin":
+        if request.user.role not in ["admin", "super_admin"]:
             return standard_error_response(
-                message="Forbidden. Only Super Admin can create Admin accounts.",
+                message="Forbidden. Admin permission required to create Admin accounts.",
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
@@ -193,9 +193,9 @@ class AdminStatusToggleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
-        if request.user.role != "super_admin":
+        if request.user.role not in ["admin", "super_admin"]:
             return standard_error_response(
-                message="Forbidden. Only Super Admin can enable/disable admin accounts.",
+                message="Forbidden. Admin permission required to enable/disable admin accounts.",
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
@@ -211,9 +211,9 @@ class AdminPasswordResetView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
-        if request.user.role != "super_admin":
+        if request.user.role not in ["admin", "super_admin"]:
             return standard_error_response(
-                message="Forbidden. Only Super Admin can reset admin passwords.",
+                message="Forbidden. Admin permission required to reset admin passwords.",
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
@@ -235,9 +235,9 @@ class AdminDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        if request.user.role != "super_admin":
+        if request.user.role not in ["admin", "super_admin"]:
             return standard_error_response(
-                message="Forbidden. Only Super Admin can delete admin accounts.",
+                message="Forbidden. Admin permission required to delete admin accounts.",
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
