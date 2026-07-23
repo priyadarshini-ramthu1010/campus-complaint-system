@@ -134,7 +134,7 @@ const ManagementLogin = () => {
           {/* Email Input with Dynamic Letter Typing Color Shift */}
           <ColorChangingEmailInput
             value={emailValue}
-            placeholder="admin@campus.com"
+            placeholder="Enter your email address"
             error={errors.email}
             registerProps={register('email', { 
               required: 'Admin email is required',
@@ -157,13 +157,13 @@ const ManagementLogin = () => {
               </button>
             </div>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
                 <Lock className="h-4.5 w-4.5" />
               </span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                className={`w-full rounded-2xl border bg-slate-950 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all ${
+                placeholder="Enter your password"
+                className={`w-full rounded-2xl border-2 bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-white placeholder-slate-400 caret-purple-400 focus:outline-none focus:border-purple-500 transition-all ${
                   errors.password ? 'border-rose-500' : 'border-slate-800'
                 }`}
                 {...register('password', { required: 'Password is required' })}

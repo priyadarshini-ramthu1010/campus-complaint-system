@@ -5,13 +5,14 @@ import { Mail, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
  * ColorChangingEmailInput Component
  * Dynamically changes input border, glow, icon, text tint, and progress bar 
  * color in real-time as each letter/character is typed into the email field.
+ * Empty by default until user types or clicks demo fill.
  */
 const ColorChangingEmailInput = ({
   value = '',
   onChange,
   onBlur,
   name = 'email',
-  placeholder = 'your-email@campus.com',
+  placeholder = 'Enter your email address',
   error = null,
   registerProps = {},
   required = true,
@@ -43,13 +44,13 @@ const ColorChangingEmailInput = ({
     const len = val.length;
     if (len === 0) {
       return {
-        stage: 'Empty',
+        stage: '',
         colorName: 'slate',
         borderColor: 'border-slate-300 dark:border-slate-700',
-        focusRing: 'focus:ring-slate-400/20 focus:border-slate-400',
-        textColor: 'text-slate-700 dark:text-slate-200',
+        focusRing: 'focus:ring-blue-500/20 focus:border-blue-500',
+        textColor: 'text-slate-900 dark:text-slate-100 font-semibold',
         iconColor: 'text-slate-400',
-        badgeBg: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+        badgeBg: '',
         progressBg: 'bg-slate-200 dark:bg-slate-700',
         percent: 0,
         gradient: 'from-slate-400 to-slate-500',
@@ -63,11 +64,11 @@ const ColorChangingEmailInput = ({
 
     if (error) {
       return {
-        stage: 'Invalid Error',
+        stage: 'Invalid Email',
         colorName: 'red',
         borderColor: 'border-red-500 dark:border-red-500',
         focusRing: 'focus:ring-red-500/30 focus:border-red-500',
-        textColor: 'text-red-600 dark:text-red-400',
+        textColor: 'text-red-600 dark:text-red-400 font-semibold',
         iconColor: 'text-red-500',
         badgeBg: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
         progressBg: 'bg-red-500',
@@ -83,7 +84,7 @@ const ColorChangingEmailInput = ({
         colorName: 'emerald',
         borderColor: 'border-emerald-500 dark:border-emerald-400',
         focusRing: 'focus:ring-emerald-500/30 focus:border-emerald-500',
-        textColor: 'text-emerald-700 dark:text-emerald-300 font-semibold',
+        textColor: 'text-emerald-700 dark:text-emerald-300 font-bold',
         iconColor: 'text-emerald-500 dark:text-emerald-400',
         badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
         progressBg: 'bg-emerald-500',
@@ -99,7 +100,7 @@ const ColorChangingEmailInput = ({
         colorName: 'indigo',
         borderColor: 'border-indigo-500 dark:border-indigo-400',
         focusRing: 'focus:ring-indigo-500/30 focus:border-indigo-500',
-        textColor: 'text-indigo-700 dark:text-indigo-300',
+        textColor: 'text-indigo-700 dark:text-indigo-300 font-semibold',
         iconColor: 'text-indigo-500 dark:text-indigo-400',
         badgeBg: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300',
         progressBg: 'bg-indigo-500',
@@ -115,7 +116,7 @@ const ColorChangingEmailInput = ({
         min: 1, max: 3, name: 'Warm Amber',
         borderColor: 'border-amber-400 dark:border-amber-500',
         focusRing: 'focus:ring-amber-500/30 focus:border-amber-500',
-        textColor: 'text-amber-700 dark:text-amber-300',
+        textColor: 'text-amber-800 dark:text-amber-300 font-semibold',
         iconColor: 'text-amber-500',
         badgeBg: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
         progressBg: 'bg-amber-400',
@@ -126,7 +127,7 @@ const ColorChangingEmailInput = ({
         min: 4, max: 7, name: 'Vibrant Orange',
         borderColor: 'border-orange-500 dark:border-orange-400',
         focusRing: 'focus:ring-orange-500/30 focus:border-orange-500',
-        textColor: 'text-orange-700 dark:text-orange-300',
+        textColor: 'text-orange-800 dark:text-orange-300 font-semibold',
         iconColor: 'text-orange-500',
         badgeBg: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300',
         progressBg: 'bg-orange-500',
@@ -137,7 +138,7 @@ const ColorChangingEmailInput = ({
         min: 8, max: 11, name: 'Electric Sky',
         borderColor: 'border-sky-500 dark:border-sky-400',
         focusRing: 'focus:ring-sky-500/30 focus:border-sky-500',
-        textColor: 'text-sky-700 dark:text-sky-300',
+        textColor: 'text-sky-800 dark:text-sky-300 font-semibold',
         iconColor: 'text-sky-500',
         badgeBg: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
         progressBg: 'bg-sky-500',
@@ -148,7 +149,7 @@ const ColorChangingEmailInput = ({
         min: 12, max: 99, name: 'Purple Neon',
         borderColor: 'border-purple-500 dark:border-purple-400',
         focusRing: 'focus:ring-purple-500/30 focus:border-purple-500',
-        textColor: 'text-purple-700 dark:text-purple-300',
+        textColor: 'text-purple-800 dark:text-purple-300 font-semibold',
         iconColor: 'text-purple-500',
         badgeBg: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
         progressBg: 'bg-purple-500',
@@ -178,12 +179,12 @@ const ColorChangingEmailInput = ({
 
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
-      {/* Live typing status header bar */}
+      {/* Header Label */}
       <div className="flex items-center justify-between text-[11px]">
         <label className="font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           Email Address
-          {typedLength > 0 && (
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold transition-all duration-300 animate-pulse ${colorState.badgeBg}`}>
+          {typedLength > 0 && colorState.stage && (
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold transition-all duration-300 ${colorState.badgeBg}`}>
               {colorState.stage}
             </span>
           )}
@@ -195,7 +196,7 @@ const ColorChangingEmailInput = ({
         )}
       </div>
 
-      {/* Main Input Container with Dynamic Color Shifting */}
+      {/* Main Input Field */}
       <div className="relative group">
         <span className={`absolute inset-y-0 left-0 pl-3.5 flex items-center transition-colors duration-300 ${colorState.iconColor}`}>
           <Mail className="h-4.5 w-4.5" />
@@ -216,7 +217,7 @@ const ColorChangingEmailInput = ({
             if (onBlur) onBlur(e);
             if (registerProps.onBlur) registerProps.onBlur(e);
           }}
-          className={`w-full rounded-2xl border-2 bg-slate-50/70 dark:bg-slate-900/70 pl-11 pr-10 py-3 text-xs sm:text-sm font-medium focus:outline-none transition-all duration-300 ${colorState.borderColor} ${colorState.focusRing} ${colorState.textColor} ${colorState.shadowGlow}`}
+          className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-10 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none transition-all duration-300 ${colorState.borderColor} ${colorState.focusRing} ${colorState.shadowGlow}`}
         />
 
         {/* Right Status Icon */}
@@ -231,7 +232,7 @@ const ColorChangingEmailInput = ({
         </div>
       </div>
 
-      {/* Dynamic Letter Typing Color Bar */}
+      {/* Dynamic Letter Typing Progress Bar */}
       {typedLength > 0 && (
         <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden transition-all duration-300 mt-0.5">
           <div

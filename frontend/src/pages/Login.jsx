@@ -49,14 +49,10 @@ const Login = ({ initialRole = 'student' }) => {
 
   const emailValue = watch('email');
 
-  // Load remembered email on mount
+  // Default email and password are empty unless demo buttons are clicked
   useEffect(() => {
-    const savedEmail = localStorage.getItem('campusfix_remembered_email');
-    if (savedEmail) {
-      setValue('email', savedEmail);
-      setRememberMe(true);
-    }
-  }, [setValue]);
+    // Keep fields empty by default
+  }, []);
 
   // Demo accounts helper
   const demoAccounts = {
@@ -148,7 +144,7 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-blue-600 to-indigo-600',
       badge: 'bg-blue-50 text-blue-700 border-blue-200',
       btnColor: 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20',
-      emailPlaceholder: 'student@campus.com'
+      emailPlaceholder: 'Enter your email address'
     },
     staff: {
       title: 'Staff Maintenance Console',
@@ -157,7 +153,7 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-violet-600 to-purple-600',
       badge: 'bg-purple-50 text-purple-700 border-purple-200',
       btnColor: 'bg-purple-600 hover:bg-purple-700 shadow-purple-500/20',
-      emailPlaceholder: 'staff@campus.com'
+      emailPlaceholder: 'Enter your email address'
     },
     admin: {
       title: 'Admin Command Center',
@@ -166,7 +162,7 @@ const Login = ({ initialRole = 'student' }) => {
       color: 'from-slate-800 to-indigo-900',
       badge: 'bg-slate-100 text-slate-800 border-slate-300',
       btnColor: 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20',
-      emailPlaceholder: 'admin@campus.com'
+      emailPlaceholder: 'Enter your email address'
     }
   };
 
@@ -377,9 +373,9 @@ const Login = ({ initialRole = 'student' }) => {
                   </span>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    className={`w-full rounded-2xl border bg-slate-50/50 pl-11 pr-11 py-3 text-xs sm:text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all duration-200 ${
-                      errors.password ? 'border-red-400 focus:ring-red-500/10' : 'border-slate-200 focus:border-blue-500'
+                    placeholder="Enter your password"
+                    className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
+                      errors.password ? 'border-red-400 focus:ring-red-500/10' : 'border-slate-300 dark:border-slate-700'
                     }`}
                     {...register('password', { required: 'Password is required' })}
                   />

@@ -183,7 +183,7 @@ const Register = () => {
           <div className="sm:col-span-2 text-left">
             <ColorChangingEmailInput
               value={emailValue}
-              placeholder="alice@campus.com"
+              placeholder="Enter your email address"
               error={errors.email}
               registerProps={register('email', { 
                 required: 'Email address is required',
@@ -204,9 +204,9 @@ const Register = () => {
               </span>
               <input
                 type="password"
-                placeholder="Minimum 6 characters"
-                className={`w-full rounded-2xl border bg-slate-50/50 dark:bg-slate-900/60 pl-11 pr-4 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 transition-all duration-200 ${
-                  errors.password ? 'border-red-300 focus:ring-red-500/10' : 'border-slate-200/80 dark:border-slate-800 focus:border-blue-500'
+                placeholder="Enter your password"
+                className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
+                  errors.password ? 'border-red-300 focus:ring-red-500/10' : 'border-slate-200/80 dark:border-slate-800'
                 }`}
                 {...register('password', { 
                   required: 'Password is required',
