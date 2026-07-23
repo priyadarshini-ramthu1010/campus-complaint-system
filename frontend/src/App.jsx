@@ -31,6 +31,13 @@ import AdminStudents from './pages/admin/AdminStudents';
 import AdminComplaints from './pages/admin/AdminComplaints';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminManagement from './pages/admin/AdminManagement';
+import AdminDepartments from './pages/admin/AdminDepartments';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminBuildings from './pages/admin/AdminBuildings';
+import AdminReports from './pages/admin/AdminReports';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminNotifications from './pages/admin/AdminNotifications';
+import AdminSettings from './pages/admin/AdminSettings';
 import UserManagement from './pages/admin/UserManagement';
 
 // Staff Page
@@ -196,7 +203,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminCategories />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -206,7 +213,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminBuildings />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -216,7 +223,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminDepartments />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -226,7 +233,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminReports />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -236,7 +243,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminAnalytics />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -246,7 +253,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminNotifications />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -256,7 +263,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
                   <AdminLayout>
-                    <AdminDashboard />
+                    <AdminSettings />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
