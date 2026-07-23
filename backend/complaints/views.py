@@ -553,3 +553,112 @@ class NotificationMarkAllReadView(APIView):
 
         notif_col.update_many({"user_id": u_oid}, {"$set": {"is_read": True}})
         return standard_success_response(message="All notifications marked as read", status_code=status.HTTP_200_OK)
+
+
+class StaffDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "staff":
+            return standard_error_response(
+                message="Forbidden. Only staff members can access the staff dashboard.",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        from db_connection import get_collection
+        from bson import ObjectId
+
+        try:
+            complaints_col = get_collection("complaints")
+            try:
+                u_oid = ObjectId(str(request.user.id))
+            except Exception:
+                u_oid = request.user.id
+
+            now = datetime.datetime.utcnow()
+            today_start = datetime.datetime(now.year, now.month, now.day)
+
+            query = {"assigned_staff_id": u_oid, "is_deleted": False}
+
+            assigned_today = complaints_col.count_documents({
+                **query,
+                "assigned_date": {"$gte": today_start}
+            })
+
+            pending = complaints_col.count_documents({
+                **query,
+                "status": "Pending"
+            })
+
+            in_progress = complaints_col.count_documents({
+                **query,
+                "status": {"$in": ["In Progress", "Accepted", "Assigned", "Waiting for Parts"]}
+            })
+
+            completed = complaints_col.count_documents({
+                **query,
+                "status": {"$in": ["Resolved", "Completed"]}
+            })
+
+            stats = {
+                "assignedToday": assigned_today,
+                "pending": pending,
+                "inProgress": in_progress,
+                "completed": completed
+            }
+
+            profile = {
+                "id": str(request.user.id),
+                "name": request.user.name,
+                "employee_id": getattr(request.user, "employee_id", "STF-001"),
+                "department": getattr(request.user, "department", "General Maintenance"),
+                "designation": "Technician Specialist",
+                "today_date": now.strftime("%d %b %Y")
+            }
+
+            return standard_success_response(
+                message="Staff dashboard summary retrieved successfully",
+                data={
+                    "stats": stats,
+                    "profile": profile
+                },
+                status_code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return standard_error_response(
+                message=f"Failed to fetch staff dashboard: {str(e)}",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UploadImageUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        if "image" not in request.FILES and "file" not in request.FILES:
+            return standard_error_response(message="No image file provided", status_code=status.HTTP_400_BAD_REQUEST)
+
+        file = request.FILES.get("image") or request.FILES.get("file")
+        valid, msg_or_ext = validate_image_file(file)
+        if not valid:
+            return standard_error_response(message=msg_or_ext, status_code=status.HTTP_400_BAD_REQUEST)
+
+        unique_name = f"repair_{uuid.uuid4()}{msg_or_ext}"
+        import base64
+        try:
+            file.seek(0)
+            file_bytes = file.read()
+            base64_data = base64.b64encode(file_bytes).decode('utf-8')
+            img_url = f"data:image/jpeg;base64,{base64_data}"
+        except Exception as e:
+            return standard_error_response(message=f"Failed to process file: {str(e)}", status_code=status.HTTP_400_BAD_REQUEST)
+
+        return standard_success_response(
+            message="Image uploaded successfully",
+            data={
+                "image_path": f"complaints/{unique_name}",
+                "url": img_url
+            },
+            status_code=status.HTTP_201_CREATED
+        )
