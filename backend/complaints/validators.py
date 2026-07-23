@@ -53,15 +53,11 @@ def validate_status_update(data):
     """
     errors = {}
     new_status = data.get("status", "").strip()
-    remarks = data.get("remarks", "").strip()
 
     valid_statuses = {"Pending", "Assigned", "In Progress", "Resolved", "Rejected"}
     if not new_status:
         errors["status"] = "Status value is required"
     elif new_status not in valid_statuses:
         errors["status"] = f"Invalid status. Choose from: {', '.join(valid_statuses)}"
-
-    if not remarks:
-        errors["remarks"] = "Remarks/notes are required for auditing updates"
 
     return len(errors) == 0, errors

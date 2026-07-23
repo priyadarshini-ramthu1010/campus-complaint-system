@@ -174,7 +174,7 @@ const StaffDashboard = () => {
     // Construct Form Data
     const formData = new FormData();
     formData.append('status', statusValue);
-    formData.append('remarks', remarks);
+    formData.append('remarks', remarks.trim() || `Work status updated to ${statusValue}`);
 
     resolutionFiles.forEach((file) => {
       formData.append('resolution_images', file);

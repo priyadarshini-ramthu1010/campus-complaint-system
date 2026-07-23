@@ -259,7 +259,7 @@ const AdminDashboard = () => {
     try {
       const res = await api.put(`/complaints/${targetComplaint.id}/status`, {
         status: statusValue,
-        remarks: statusRemarks
+        remarks: statusRemarks.trim() || `Status updated to ${statusValue}`
       });
 
       if (res.success) {

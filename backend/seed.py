@@ -58,25 +58,25 @@ def seed_database(target_db=None):
     admin_id = users_col.insert_one(admin_doc).inserted_id
     print("Seeded Admin: admin@campus.com")
 
-    # Seed 5 Maintenance Staff
+    # Seed 6 Maintenance Staff with realistic names
     staff_depts = [
-        ("Electrical Maintenance", "Electrical"),
-        ("Plumbing Maintenance", "Plumbing"),
-        ("Network Support", "Internet"),
-        ("Furniture & Carpentry", "Furniture"),
-        ("Sanitation & Cleaning", "Cleaning")
+        ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff@campus.com"),
+        ("Suresh Sharma (Lead Plumber)", "Plumbing Maintenance", "Plumbing", "staff2@campus.com"),
+        ("Anita Verma (IT & Network Tech)", "Network Support", "Internet", "staff3@campus.com"),
+        ("Vikram Singh (Carpentry Specialist)", "Furniture & Carpentry", "Furniture", "staff4@campus.com"),
+        ("Ramesh Patel (Sanitation Lead)", "Sanitation & Cleaning", "Cleaning", "staff5@campus.com"),
+        ("Deepak Verma (HVAC & AC Tech)", "HVAC & Cooling", "Electrical", "staff6@campus.com")
     ]
     staff_ids = []
     staff_docs = []
-    for idx, (dept_name, cat) in enumerate(staff_depts):
+    for idx, (staff_name, dept_name, cat, email) in enumerate(staff_depts):
         num = idx + 1
-        email = "staff@campus.com" if num == 1 else f"staff{num}@campus.com"
         staff_doc = {
-            "name": f"Staff Repairman {num}",
+            "name": staff_name,
             # roll_number is completely omitted for Staff
             "email": email,
             "password": hashed_pw,
-            "phone": f"876543210{num}",
+            "phone": f"987654321{num}",
             "department": dept_name,
             "year": "N/A",
             "role": "staff",
@@ -93,7 +93,7 @@ def seed_database(target_db=None):
             "name": staff_doc["name"],
             "category": cat
         })
-        print(f"Seeded Staff: {email}")
+        print(f"Seeded Staff: {staff_name} ({email})")
 
     # Seed 20 Students
     departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Chemical"]

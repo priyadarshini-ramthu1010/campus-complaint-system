@@ -228,7 +228,7 @@ class UpdateStatusView(APIView):
             )
 
         new_status = data.get("status")
-        remarks = data.get("remarks")
+        remarks = (data.get("remarks") or "").strip() or f"Status updated to {new_status} by {request.user.name}"
 
         # Process optional resolution image
         res_images = []

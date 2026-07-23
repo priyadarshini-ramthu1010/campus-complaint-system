@@ -125,7 +125,7 @@ const AdminComplaints = () => {
     try {
       const res = await api.put(`/complaints/${selectedComplaint.id}/status`, {
         status: statusValue,
-        remarks: statusRemarks
+        remarks: statusRemarks.trim() || `Status updated to ${statusValue}`
       });
       if (res.success) {
         toast.success(`Complaint status updated to ${statusValue}!`);
