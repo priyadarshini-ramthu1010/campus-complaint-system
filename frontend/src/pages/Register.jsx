@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Phone, GraduationCap, Calendar, Lock, Eye, EyeOff, Sun, Moon, Loader2 } from 'lucide-react';
+import { User, Phone, GraduationCap, Calendar, Lock, Eye, EyeOff, Sun, Moon, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
@@ -16,10 +16,26 @@ const Register = () => {
   const [isSubmittingState, setIsSubmittingState] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const emailValue = watch('email');
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    mode: 'onChange'
+  });
+
+  const emailValue = watch('email') || '';
+  const passwordValue = watch('password') || '';
+
+  // Validation RegEx Patterns
+  const GMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\?.,])[A-Za-z\d!@#$%^&*()_+\-=\?.,]{8,20}$/;
+
+  const isEmailValid = GMAIL_REGEX.test(emailValue);
+  const isPasswordValid = STRONG_PASSWORD_REGEX.test(passwordValue);
 
   const onSubmit = async (data) => {
+    if (!isEmailValid || !isPasswordValid) {
+      toast.error('Please fix validation errors before registering.');
+      return;
+    }
+
     setIsSubmittingState(true);
     const result = await registerAuth(data);
     
@@ -178,17 +194,17 @@ const Register = () => {
             {errors.year && <span className="text-[10px] text-red-500 font-semibold pl-1">{errors.year.message}</span>}
           </div>
 
-          {/* Email Address with Dynamic Letter Typing Color Shift */}
+          {/* Email Address */}
           <div className="sm:col-span-2 text-left">
             <ColorChangingEmailInput
               value={emailValue}
-              placeholder="Enter your email address"
+              placeholder="user@gmail.com"
               error={errors.email}
               registerProps={register('email', { 
-                required: 'Email address is required',
+                required: 'Please enter a valid Gmail address.',
                 pattern: {
-                  value: /^[\w\.\+-]+@[\w\.-]+\.\w+$/,
-                  message: 'Invalid email address format'
+                  value: GMAIL_REGEX,
+                  message: 'Please enter a valid Gmail address.'
                 }
               })}
             />
@@ -196,20 +212,41 @@ const Register = () => {
 
           {/* Password */}
           <div className="flex flex-col gap-1.5 sm:col-span-2 text-left">
-            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Password</label>
+              
+              {/* Live Password Badge */}
+              {passwordValue.length > 0 && (
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all duration-300 ${
+                  isPasswordValid 
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' 
+                    : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border-red-300 dark:border-red-800'
+                }`}>
+                  {isPasswordValid ? '✔ Strong Password' : '❌ Weak Password'}
+                </span>
+              )}
+            </div>
+
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 dark:text-slate-500">
                 <Lock className="h-4.5 w-4.5" />
               </span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
-                  errors.password ? 'border-red-300 focus:ring-red-500/10' : 'border-slate-200/80 dark:border-slate-800'
+                placeholder="Campus@123"
+                className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none transition-all duration-200 ${
+                  errors.password 
+                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500/20' 
+                    : isPasswordValid 
+                    ? 'border-emerald-500 dark:border-emerald-400 focus:ring-emerald-500/20' 
+                    : 'border-slate-200/80 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'
                 }`}
                 {...register('password', { 
-                  required: 'Password is required',
-                  minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                  required: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
+                  pattern: {
+                    value: STRONG_PASSWORD_REGEX,
+                    message: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
+                  }
                 })}
               />
               <button
@@ -220,15 +257,20 @@ const Register = () => {
                 {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
               </button>
             </div>
-            {errors.password && <span className="text-[10px] text-red-500 font-semibold pl-1">{errors.password.message}</span>}
+            {errors.password && (
+              <span className="text-[10px] text-red-500 font-semibold pl-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3 inline" />
+                {errors.password.message}
+              </span>
+            )}
           </div>
 
-          {/* Submit */}
+          {/* Submit — Blocked until both Email & Password are valid */}
           <div className="sm:col-span-2 mt-2">
             <button
               type="submit"
-              disabled={isSubmittingState}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all duration-200 shadow-lg shadow-blue-500/15 disabled:opacity-75 flex items-center justify-center gap-2"
+              disabled={!isEmailValid || !isPasswordValid || isSubmittingState}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all duration-200 shadow-lg shadow-blue-500/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmittingState ? (
                 <>

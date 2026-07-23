@@ -19,6 +19,7 @@ import {
   ShieldCheck, 
   ArrowRight,
   CheckCircle2,
+  AlertCircle,
   Sparkles,
   Sun,
   Moon
@@ -42,8 +43,19 @@ const Login = ({ initialRole = 'student' }) => {
       email: '',
       password: '',
       rememberMe: false
-    }
+    },
+    mode: 'onChange'
   });
+
+  const emailValue = watch('email') || '';
+  const passwordValue = watch('password') || '';
+
+  // Validation RegEx Patterns
+  const GMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\?.,])[A-Za-z\d!@#$%^&*()_+\-=\?.,]{8,20}$/;
+
+  const isEmailValid = GMAIL_REGEX.test(emailValue);
+  const isPasswordValid = STRONG_PASSWORD_REGEX.test(passwordValue);
 
   // Explicitly clear email, password, and validation errors when switching tabs
   useEffect(() => {
@@ -55,13 +67,16 @@ const Login = ({ initialRole = 'student' }) => {
     clearErrors();
   }, [activeTab, reset, clearErrors]);
 
-  const emailValue = watch('email');
-
   const handleTabChange = (roleKey) => {
     setActiveTab(roleKey);
   };
 
   const onSubmit = async (data) => {
+    if (!isEmailValid || !isPasswordValid) {
+      toast.error('Please fix validation errors before logging in.');
+      return;
+    }
+
     setIsSubmittingState(true);
 
     if (rememberMe) {
@@ -76,7 +91,6 @@ const Login = ({ initialRole = 'student' }) => {
       const savedUser = JSON.parse(localStorage.getItem('user'));
       const userRole = savedUser?.role;
 
-      // Handle role-based navigation smoothly
       if (userRole === 'student') {
         toast.success(`Welcome back, ${savedUser.name || 'Student'}!`);
         navigate('/student/dashboard');
@@ -98,12 +112,12 @@ const Login = ({ initialRole = 'student' }) => {
 
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
-    if (!forgotEmail) {
-      toast.error('Please enter your email address');
+    if (!GMAIL_REGEX.test(forgotEmail)) {
+      toast.error('Please enter a valid Gmail address');
       return;
     }
-    if (!newPassword || newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters long');
+    if (!STRONG_PASSWORD_REGEX.test(newPassword)) {
+      toast.error('Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.');
       return;
     }
     setIsSendingReset(true);
@@ -311,14 +325,14 @@ const Login = ({ initialRole = 'student' }) => {
               
               {/* Email Input */}
               <ColorChangingEmailInput
-                value={emailValue || ''}
+                value={emailValue}
                 placeholder={currentRole.emailPlaceholder}
                 error={errors.email}
                 registerProps={register('email', {
-                  required: 'Email address is required',
+                  required: 'Please enter a valid Gmail address.',
                   pattern: {
-                    value: /^[\w\.\+-]+@[\w\.-]+\.\w+$/,
-                    message: 'Invalid email format'
+                    value: GMAIL_REGEX,
+                    message: 'Please enter a valid Gmail address.'
                   }
                 })}
               />
@@ -326,13 +340,25 @@ const Login = ({ initialRole = 'student' }) => {
               {/* Password Input */}
               <div className="flex flex-col gap-1.5 text-left">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                     Password
                   </label>
+
+                  {/* Live Password Validation Badge */}
+                  {passwordValue.length > 0 && (
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all duration-300 ${
+                      isPasswordValid 
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' 
+                        : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border-red-300 dark:border-red-800'
+                    }`}>
+                      {isPasswordValid ? '✔ Strong Password' : '❌ Weak Password'}
+                    </span>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => setIsForgotPasswordOpen(true)}
-                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors ml-auto"
                   >
                     Forgot password?
                   </button>
@@ -345,10 +371,20 @@ const Login = ({ initialRole = 'student' }) => {
                     type={showPassword ? 'text' : 'password'}
                     placeholder={currentRole.passwordPlaceholder}
                     autoComplete="new-password"
-                    className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
-                      errors.password ? 'border-red-400 focus:ring-red-500/10' : 'border-slate-300 dark:border-slate-700'
+                    className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none transition-all duration-200 ${
+                      errors.password 
+                        ? 'border-red-500 dark:border-red-500 focus:ring-red-500/20' 
+                        : isPasswordValid 
+                        ? 'border-emerald-500 dark:border-emerald-400 focus:ring-emerald-500/20' 
+                        : 'border-slate-300 dark:border-slate-700 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
-                    {...register('password', { required: 'Password is required' })}
+                    {...register('password', {
+                      required: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
+                      pattern: {
+                        value: STRONG_PASSWORD_REGEX,
+                        message: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
+                      }
+                    })}
                   />
                   <button
                     type="button"
@@ -359,7 +395,8 @@ const Login = ({ initialRole = 'student' }) => {
                   </button>
                 </div>
                 {errors.password && (
-                  <span className="text-[11px] text-red-500 font-semibold pl-1">
+                  <span className="text-[11px] text-red-500 font-semibold pl-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3 inline" />
                     {errors.password.message}
                   </span>
                 )}
@@ -378,11 +415,11 @@ const Login = ({ initialRole = 'student' }) => {
                 </label>
               </div>
 
-              {/* Submit CTA Button */}
+              {/* Submit CTA Button — Blocked until both Email & Password are valid */}
               <button
                 type="submit"
-                disabled={isSubmittingState}
-                className={`w-full text-white font-extrabold py-3.5 px-6 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-lg disabled:opacity-70 ${currentRole.btnColor} shimmer-trigger`}
+                disabled={!isEmailValid || !isPasswordValid || isSubmittingState}
+                className={`w-full text-white font-extrabold py-3.5 px-6 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${currentRole.btnColor} shimmer-trigger`}
               >
                 {isSubmittingState ? (
                   <>
