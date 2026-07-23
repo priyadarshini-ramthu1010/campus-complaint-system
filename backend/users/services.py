@@ -111,12 +111,11 @@ class UserService:
 
             doc["id"] = str(doc["_id"])
             doc["_id"] = str(doc["_id"])
-            if doc.get("created_by") and isinstance(doc["created_by"], ObjectId):
-                doc["created_by"] = str(doc["created_by"])
-            if doc.get("created_at") and isinstance(doc["created_at"], datetime.datetime):
-                doc["created_at"] = doc["created_at"].isoformat()
-            if doc.get("updated_at") and isinstance(doc["updated_at"], datetime.datetime):
-                doc["updated_at"] = doc["updated_at"].isoformat()
+            for key, val in doc.items():
+                if isinstance(val, ObjectId):
+                    doc[key] = str(val)
+                elif isinstance(val, datetime.datetime):
+                    doc[key] = val.isoformat()
             doc.pop("password", None)
             results.append(doc)
         return results

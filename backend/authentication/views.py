@@ -8,6 +8,7 @@ from .validators import validate_registration_data, validate_login_data
 from .services import AuthService
 
 class RegisterView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -85,6 +86,7 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -169,6 +171,7 @@ class ProfileView(APIView):
 
 
 class ResetPasswordView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):

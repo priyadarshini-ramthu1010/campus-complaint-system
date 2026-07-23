@@ -6,31 +6,46 @@ from dotenv import load_dotenv
 # Load .env variables
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://darshiniramthu_db_user:2005@cluster0.289biyt.mongodb.net/?appName=Cluster0")
+MONGO_URIS = [
+    os.getenv("MONGO_URI", "mongodb+srv://darshiniramthu_db_user:2005@cluster0.289biyt.mongodb.net/?appName=Cluster0"),
+    "mongodb+srv://Darshini:2005@cluster0.mqrxkbv.mongodb.net/?appName=Cluster0"
+]
 
-try:
-    client = MongoClient(
-        MONGO_URI,
-        tlsCAFile=certifi.where(),
-        tlsAllowInvalidCertificates=True,
-        serverSelectionTimeoutMS=5000
-    )
-    # The ismaster command verifies Atlas connection
-    client.admin.command('ismaster')
-    db = client['campus_complaints']
-    print("Connected successfully to MongoDB Atlas database!")
-except Exception as e:
-    print(f"MongoDB Atlas primary connection error ({e}). Retrying fallback configuration...")
-    client = MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True, serverSelectionTimeoutMS=5000)
+client = None
+db = None
+
+for uri in MONGO_URIS:
+    try:
+        # Try without certifi first (avoids Windows Python TLS alert bug)
+        c = MongoClient(uri, tlsAllowInvalidCertificates=True, serverSelectionTimeoutMS=4000)
+        c.admin.command('ismaster')
+        client = c
+        db = client['campus_complaints']
+        print(f"Connected successfully to MongoDB Atlas database!")
+        break
+    except Exception as e:
+        try:
+            # Try with certifi fallback
+            c = MongoClient(uri, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=4000)
+            c.admin.command('ismaster')
+            client = c
+            db = client['campus_complaints']
+            print(f"Connected successfully to MongoDB Atlas database with certifi!")
+            break
+        except Exception:
+            continue
+
+if db is None:
+    # Final fallback client
+    client = MongoClient(MONGO_URIS[0], tlsAllowInvalidCertificates=True)
     db = client['campus_complaints']
 
 def get_collection(name):
     """
-    Helper to quickly fetch a collection from the active MongoDB connection.
+    Helper to fetch a collection from active MongoDB connection.
     """
     return db[name]
 
-# Helper connection check
 def check_connection():
     try:
         client.admin.command('ismaster')

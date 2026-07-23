@@ -62,14 +62,12 @@ class MongoJWTAuthentication(BaseAuthentication):
 
         try:
             payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("JWT Token has expired")
-        except jwt.InvalidTokenError:
-            raise AuthenticationFailed("Invalid authentication token")
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, Exception):
+            return None
 
         user_id = payload.get("id")
         if not user_id:
-            raise AuthenticationFailed("Token payload missing user identifier")
+            return None
 
         users_collection = get_collection("users")
         user_doc = None
