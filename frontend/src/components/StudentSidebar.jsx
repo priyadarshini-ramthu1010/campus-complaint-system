@@ -24,7 +24,7 @@ const StudentSidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
     { name: 'Raise Complaint', path: '/student/complaints/raise', icon: PlusCircle },
-    { name: 'My Complaints', path: '/student/complaints', icon: ListTodo },
+    { name: 'My Complaints', path: '/student/my-complaints', icon: ListTodo },
     { name: 'Notifications', path: '/student/notifications', icon: Bell },
     { name: 'Profile', path: '/student/profile', icon: User },
     { name: 'Settings', path: '/student/settings', icon: Settings },

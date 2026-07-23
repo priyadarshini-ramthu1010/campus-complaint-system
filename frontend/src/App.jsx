@@ -21,6 +21,7 @@ import ManagementLogin from './pages/admin/ManagementLogin';
 // Student Portal Pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import RaiseComplaint from './pages/student/RaiseComplaint';
+import StudentMyComplaints from './pages/student/StudentMyComplaints';
 import StudentNotifications from './pages/student/StudentNotifications';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentSettings from './pages/student/StudentSettings';
@@ -95,11 +96,31 @@ function App() {
               } 
             />
             <Route 
+              path="/student/my-complaints" 
+              element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <StudentLayout>
+                    <StudentMyComplaints />
+                  </StudentLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/student/complaints" 
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <StudentLayout>
-                    <StudentDashboard />
+                    <StudentMyComplaints />
+                  </StudentLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/raise-complaint" 
+              element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <StudentLayout>
+                    <RaiseComplaint />
                   </StudentLayout>
                 </ProtectedRoute>
               } 
