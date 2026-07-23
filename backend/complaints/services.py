@@ -360,10 +360,11 @@ class ComplaintService:
     @staticmethod
     def update_status(complaint_id, new_status, remarks, user_id, user_name, user_role, resolution_images=None, before_image=None, after_image=None):
         """
-        Updates the status of a complaint, appends an entry to status history, and notifies the student.
+        Updates the status of a complaint, appends an entry to status history, and sends role-based notifications.
         """
         complaints_col = get_collection("complaints")
         history_col = get_collection("status_history")
+        users_col = get_collection("users")
         notif_col = get_collection("notifications")
 
         complaint_oid = to_object_id(complaint_id)
@@ -373,39 +374,62 @@ class ComplaintService:
         if not complaint:
             return False, "Complaint not found"
 
-        # Permission check
+        # Permission check for Staff
         if user_role == "staff":
             assigned_id = complaint.get("assigned_staff_id")
             if not assigned_id or str(assigned_id) != user_id:
                 return False, "You are not assigned to this complaint"
 
         now = datetime.datetime.utcnow()
+        c_num = complaint.get("complaint_number") or complaint_id
+
+        # Normalize status names from prompt
+        if new_status in ["Completed", "Mark Work Completed", "Completed by Staff"]:
+            new_status = "Waiting for Admin Verification"
+
         update_data = {
             "status": new_status,
-            "remarks": remarks,
             "updated_at": now,
             "updated_by": u_oid
         }
+
+        if remarks:
+            if user_role == "staff":
+                update_data["staff_remarks"] = remarks
+                update_data["remarks"] = remarks
+            elif user_role in ["admin", "super_admin"]:
+                update_data["admin_remarks"] = remarks
+                update_data["remarks"] = remarks
 
         if before_image:
             update_data["before_image"] = before_image
         if after_image:
             update_data["after_image"] = after_image
 
-        # Resolution details
-        if new_status in ["Resolved", "Completed"]:
-            update_data["status"] = "Resolved"
-            new_status = "Resolved"
-            update_data["resolution_notes"] = remarks
+        # Handle workflow timestamps
+        if new_status == "Accepted":
+            update_data["accepted_date"] = now
+        elif new_status == "In Progress":
+            update_data["started_date"] = now
+        elif new_status == "Waiting for Admin Verification":
+            update_data["completed_date"] = now
+            update_data["completion_remarks"] = remarks
+        elif new_status == "Resolved":
+            update_data["resolved_date"] = now
             update_data["resolution_date"] = now
+            update_data["verified_date"] = now
             update_data["resolved_by"] = u_oid
+            update_data["approved_by"] = u_oid
             if resolution_images:
                 update_data["images"] = complaint.get("images", []) + resolution_images
+        elif new_status == "Reopened":
+            update_data["reopened_date"] = now
+            update_data["rejection_reason"] = remarks
 
         try:
             complaints_col.update_one({"_id": complaint_oid}, {"$set": update_data})
 
-            # History entry
+            # Timeline History Entry
             history_col.insert_one({
                 "complaint_id": complaint_oid,
                 "status": new_status,
@@ -415,10 +439,84 @@ class ComplaintService:
                 "updated_at": now
             })
 
-            # Create Notification for Student
             student_oid = complaint.get("student_id")
-            c_num = complaint.get("complaint_number") or complaint_id
-            if student_oid:
+            staff_oid = complaint.get("assigned_staff_id")
+
+            # Notification Logic based on Workflow Steps:
+
+            # 1. Staff completed work -> Notify ALL Admins & Student
+            if new_status == "Waiting for Admin Verification":
+                # Notify Admins
+                admins = list(users_col.find({"role": {"$in": ["admin", "super_admin"]}}))
+                for adm in admins:
+                    notif_col.insert_one({
+                        "user_id": adm["_id"],
+                        "role": "admin",
+                        "title": "Work Completed",
+                        "message": f"Staff {user_name} has completed Complaint {c_num}.",
+                        "complaint_id": complaint_oid,
+                        "complaint_number": c_num,
+                        "staff_name": user_name,
+                        "completion_time": now.isoformat(),
+                        "is_read": False,
+                        "created_at": now
+                    })
+
+                # Notify Student
+                if student_oid:
+                    notif_col.insert_one({
+                        "user_id": student_oid,
+                        "role": "student",
+                        "title": "Work Completed by Staff",
+                        "message": f"Staff {user_name} completed work on Complaint {c_num}. Pending Admin verification.",
+                        "complaint_id": complaint_oid,
+                        "complaint_number": c_num,
+                        "is_read": False,
+                        "created_at": now
+                    })
+
+            # 2. Admin Approved -> Notify Student
+            elif new_status == "Resolved":
+                if student_oid:
+                    notif_col.insert_one({
+                        "user_id": student_oid,
+                        "role": "student",
+                        "title": "Complaint Resolved",
+                        "message": f"Your complaint {c_num} has been resolved successfully.",
+                        "complaint_id": complaint_oid,
+                        "complaint_number": c_num,
+                        "is_read": False,
+                        "created_at": now
+                    })
+
+            # 3. Admin Rejected -> Notify Staff & Student
+            elif new_status == "Reopened":
+                if staff_oid:
+                    notif_col.insert_one({
+                        "user_id": staff_oid,
+                        "role": "staff",
+                        "title": "Work Reopened by Admin",
+                        "message": f"Admin rejected completion for Complaint {c_num}. Reason: {remarks}",
+                        "complaint_id": complaint_oid,
+                        "complaint_number": c_num,
+                        "rejection_reason": remarks,
+                        "is_read": False,
+                        "created_at": now
+                    })
+                if student_oid:
+                    notif_col.insert_one({
+                        "user_id": student_oid,
+                        "role": "student",
+                        "title": "Complaint Reopened",
+                        "message": f"Admin has reopened Complaint {c_num} for further maintenance.",
+                        "complaint_id": complaint_oid,
+                        "complaint_number": c_num,
+                        "is_read": False,
+                        "created_at": now
+                    })
+
+            # 4. Standard Student Notification for Accepted / In Progress
+            elif student_oid:
                 notif_col.insert_one({
                     "user_id": student_oid,
                     "role": "student",

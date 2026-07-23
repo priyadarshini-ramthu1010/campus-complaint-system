@@ -11,7 +11,12 @@ from .views import (
     NotificationReadView,
     NotificationMarkAllReadView,
     StaffDashboardView,
-    UploadImageUploadView
+    UploadImageUploadView,
+    StaffAcceptWorkView,
+    StaffStartWorkView,
+    StaffCompleteWorkView,
+    AdminApproveWorkView,
+    AdminRejectWorkView
 )
 
 urlpatterns = [
@@ -23,10 +28,15 @@ urlpatterns = [
     path('admin/dashboard', DashboardStatsView.as_view(), name='admin-dashboard-stats'),
     path('ai/chat', AIChatAssistantView.as_view(), name='ai-chat-assistant'),
 
-    # Requested API aliases
-    path('staff/dashboard', StaffDashboardView.as_view(), name='staff-dashboard'),
+    # Explicit Workflow API Endpoints
     path('assign-staff', AssignStaffView.as_view(), name='assign-staff-alias'),
+    path('staff/dashboard', StaffDashboardView.as_view(), name='staff-dashboard'),
     path('staff/assigned-complaints', AssignedComplaintsView.as_view(), name='staff-assigned-complaints'),
+    path('staff/accept', StaffAcceptWorkView.as_view(), name='staff-accept-work'),
+    path('staff/start-work', StaffStartWorkView.as_view(), name='staff-start-work'),
+    path('staff/complete-work', StaffCompleteWorkView.as_view(), name='staff-complete-work'),
+    path('admin/approve-work', AdminApproveWorkView.as_view(), name='admin-approve-work'),
+    path('admin/reject-work', AdminRejectWorkView.as_view(), name='admin-reject-work'),
     path('complaints/update-status', UpdateStatusView.as_view(), name='update-status-global'),
     path('notifications', NotificationsView.as_view(), name='notifications-list'),
     path('notifications/read', NotificationMarkAllReadView.as_view(), name='notifications-mark-all-read'),

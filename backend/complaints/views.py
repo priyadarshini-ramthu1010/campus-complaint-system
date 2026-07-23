@@ -662,3 +662,120 @@ class UploadImageUploadView(APIView):
             },
             status_code=status.HTTP_201_CREATED
         )
+
+
+class StaffAcceptWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        complaint_id = request.data.get("complaint_id") or request.data.get("complaintId")
+        if not complaint_id:
+            return standard_error_response(message="complaintId is required", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = ComplaintService.update_status(
+            complaint_id=complaint_id,
+            new_status="Accepted",
+            remarks=request.data.get("remarks", "Staff accepted assignment"),
+            user_id=request.user.id,
+            user_name=request.user.name,
+            user_role=request.user.role
+        )
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+        return standard_success_response(message=msg, status_code=status.HTTP_200_OK)
+
+
+class StaffStartWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        complaint_id = request.data.get("complaint_id") or request.data.get("complaintId")
+        if not complaint_id:
+            return standard_error_response(message="complaintId is required", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = ComplaintService.update_status(
+            complaint_id=complaint_id,
+            new_status="In Progress",
+            remarks=request.data.get("remarks", "Work started by staff"),
+            user_id=request.user.id,
+            user_name=request.user.name,
+            user_role=request.user.role
+        )
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+        return standard_success_response(message=msg, status_code=status.HTTP_200_OK)
+
+
+class StaffCompleteWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        complaint_id = request.data.get("complaint_id") or request.data.get("complaintId")
+        if not complaint_id:
+            return standard_error_response(message="complaintId is required", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = ComplaintService.update_status(
+            complaint_id=complaint_id,
+            new_status="Waiting for Admin Verification",
+            remarks=request.data.get("remarks") or request.data.get("completionRemarks", "Work completed. Sent for admin verification."),
+            user_id=request.user.id,
+            user_name=request.user.name,
+            user_role=request.user.role,
+            before_image=request.data.get("before_image"),
+            after_image=request.data.get("after_image")
+        )
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+        return standard_success_response(message="Completion report sent to Admin successfully", status_code=status.HTTP_200_OK)
+
+
+class AdminApproveWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        if request.user.role not in ["admin", "super_admin"]:
+            return standard_error_response(message="Forbidden. Admin privileges required.", status_code=status.HTTP_403_FORBIDDEN)
+
+        complaint_id = request.data.get("complaint_id") or request.data.get("complaintId")
+        if not complaint_id:
+            return standard_error_response(message="complaintId is required", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = ComplaintService.update_status(
+            complaint_id=complaint_id,
+            new_status="Resolved",
+            remarks=request.data.get("remarks", "Admin approved work completion"),
+            user_id=request.user.id,
+            user_name=request.user.name,
+            user_role=request.user.role
+        )
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+        return standard_success_response(message="Complaint work approved & resolved", status_code=status.HTTP_200_OK)
+
+
+class AdminRejectWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        if request.user.role not in ["admin", "super_admin"]:
+            return standard_error_response(message="Forbidden. Admin privileges required.", status_code=status.HTTP_403_FORBIDDEN)
+
+        complaint_id = request.data.get("complaint_id") or request.data.get("complaintId")
+        reason = request.data.get("reason") or request.data.get("remarks")
+        if not complaint_id:
+            return standard_error_response(message="complaintId is required", status_code=status.HTTP_400_BAD_REQUEST)
+        if not reason:
+            return standard_error_response(message="Rejection reason is mandatory", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = ComplaintService.update_status(
+            complaint_id=complaint_id,
+            new_status="Reopened",
+            remarks=reason,
+            user_id=request.user.id,
+            user_name=request.user.name,
+            user_role=request.user.role
+        )
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+        return standard_success_response(message="Work rejected and complaint reopened for staff", status_code=status.HTTP_200_OK)
+
