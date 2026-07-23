@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -37,7 +37,7 @@ const Login = ({ initialRole = 'student' }) => {
   const [newPassword, setNewPassword] = useState('');
   const [isSendingReset, setIsSendingReset] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, clearErrors, watch, formState: { errors } } = useForm({
     defaultValues: {
       email: '',
       password: '',
@@ -45,7 +45,21 @@ const Login = ({ initialRole = 'student' }) => {
     }
   });
 
+  // Explicitly clear email, password, and validation errors when switching tabs
+  useEffect(() => {
+    reset({
+      email: '',
+      password: '',
+      rememberMe: false
+    });
+    clearErrors();
+  }, [activeTab, reset, clearErrors]);
+
   const emailValue = watch('email');
+
+  const handleTabChange = (roleKey) => {
+    setActiveTab(roleKey);
+  };
 
   const onSubmit = async (data) => {
     setIsSubmittingState(true);
@@ -277,7 +291,7 @@ const Login = ({ initialRole = 'student' }) => {
                     <button
                       key={tab.key}
                       type="button"
-                      onClick={() => setActiveTab(tab.key)}
+                      onClick={() => handleTabChange(tab.key)}
                       className={`relative py-2 px-3 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
                         isActive 
                           ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-200/80 dark:border-slate-700 font-extrabold' 
@@ -293,11 +307,11 @@ const Login = ({ initialRole = 'student' }) => {
             </div>
 
             {/* Main Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" autoComplete="off">
               
               {/* Email Input */}
               <ColorChangingEmailInput
-                value={emailValue}
+                value={emailValue || ''}
                 placeholder={currentRole.emailPlaceholder}
                 error={errors.email}
                 registerProps={register('email', {
@@ -330,6 +344,7 @@ const Login = ({ initialRole = 'student' }) => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder={currentRole.passwordPlaceholder}
+                    autoComplete="new-password"
                     className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
                       errors.password ? 'border-red-400 focus:ring-red-500/10' : 'border-slate-300 dark:border-slate-700'
                     }`}
