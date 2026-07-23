@@ -23,6 +23,7 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import RaiseComplaint from './pages/student/RaiseComplaint';
 import StudentNotifications from './pages/student/StudentNotifications';
 import StudentProfile from './pages/student/StudentProfile';
+import StudentSettings from './pages/student/StudentSettings';
 
 // Admin Portal Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -121,7 +122,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <StudentLayout>
-                    <StudentProfile />
+                    <StudentSettings />
                   </StudentLayout>
                 </ProtectedRoute>
               } 
@@ -131,7 +132,7 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <StudentLayout>
-                    <StudentProfile />
+                    <StudentSettings />
                   </StudentLayout>
                 </ProtectedRoute>
               } 

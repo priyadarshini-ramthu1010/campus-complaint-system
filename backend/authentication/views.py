@@ -181,13 +181,80 @@ class ProfileView(APIView):
             "department": user.department,
             "year": user.year,
             "phone": user.phone,
-            "status": getattr(user, "status", "active")
+            "status": getattr(user, "status", "active"),
+            "profile_image": getattr(user, "profile_image", ""),
+            "notifications": getattr(user, "notifications", {"email": True, "sms": False, "in_app": True})
         }
         return standard_success_response(
             message="Profile retrieved successfully",
             data=user_data,
             status_code=status.HTTP_200_OK
         )
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+        name = data.get("name")
+        phone = data.get("phone")
+        department = data.get("department")
+        year = data.get("year")
+        profile_image = data.get("profile_image")
+        notifications = data.get("notifications")
+
+        success, msg, updated_user = AuthService.update_profile(
+            user_id=user.id,
+            name=name,
+            phone=phone,
+            department=department,
+            year=year,
+            profile_image=profile_image,
+            notifications=notifications
+        )
+
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+
+        user_data = {
+            "id": str(updated_user["_id"]),
+            "name": updated_user.get("name", ""),
+            "email": updated_user.get("email", ""),
+            "role": updated_user.get("role", "student"),
+            "roll_number": updated_user.get("roll_number", ""),
+            "employee_id": updated_user.get("employee_id", ""),
+            "department": updated_user.get("department", ""),
+            "year": updated_user.get("year", ""),
+            "phone": updated_user.get("phone", ""),
+            "status": updated_user.get("status", "active"),
+            "profile_image": updated_user.get("profile_image", ""),
+            "notifications": updated_user.get("notifications", {"email": True, "sms": False, "in_app": True})
+        }
+
+        return standard_success_response(
+            message="Profile updated successfully",
+            data=user_data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+        current_password = str(data.get("current_password") or "")
+        new_password = str(data.get("new_password") or "")
+
+        if not current_password:
+            return standard_error_response(message="Current password is required", status_code=status.HTTP_400_BAD_REQUEST)
+        if not new_password or len(new_password) < 6:
+            return standard_error_response(message="New password must be at least 6 characters long", status_code=status.HTTP_400_BAD_REQUEST)
+
+        success, msg = AuthService.change_password(user.id, current_password, new_password)
+        if not success:
+            return standard_error_response(message=msg, status_code=status.HTTP_400_BAD_REQUEST)
+
+        return standard_success_response(message=msg, status_code=status.HTTP_200_OK)
 
 
 class ResetPasswordView(APIView):

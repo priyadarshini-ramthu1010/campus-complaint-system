@@ -97,6 +97,50 @@ class AuthService:
         return True, "Password reset successfully"
 
     @staticmethod
+    def update_profile(user_id, name=None, phone=None, department=None, year=None, profile_image=None, notifications=None):
+        users_col = get_collection("users")
+        oid = ObjectId(user_id) if ObjectId.is_valid(user_id) else None
+        if not oid:
+            return False, "Invalid user identifier", None
+
+        user = users_col.find_one({"_id": oid})
+        if not user:
+            return False, "User account not found", None
+
+        update_doc = {"updated_at": datetime.now(timezone.utc)}
+        if name is not None: update_doc["name"] = name.strip()
+        if phone is not None: update_doc["phone"] = phone.strip()
+        if department is not None: update_doc["department"] = department.strip()
+        if year is not None: update_doc["year"] = year.strip()
+        if profile_image is not None: update_doc["profile_image"] = profile_image
+        if notifications is not None: update_doc["notifications"] = notifications
+
+        users_col.update_one({"_id": oid}, {"$set": update_doc})
+        updated_user = users_col.find_one({"_id": oid})
+        return True, "Profile updated successfully", updated_user
+
+    @staticmethod
+    def change_password(user_id, current_password, new_password):
+        users_col = get_collection("users")
+        oid = ObjectId(user_id) if ObjectId.is_valid(user_id) else None
+        if not oid:
+            return False, "Invalid user identifier"
+
+        user = users_col.find_one({"_id": oid})
+        if not user:
+            return False, "User account not found"
+
+        if not AuthService.verify_password(current_password, user.get("password", "")):
+            return False, "Current password is incorrect"
+
+        hashed_pw = AuthService.hash_password(new_password)
+        users_col.update_one(
+            {"_id": oid},
+            {"$set": {"password": hashed_pw, "updated_at": datetime.now(timezone.utc)}}
+        )
+        return True, "Password updated successfully"
+
+    @staticmethod
     def generate_jwt_token(user_doc):
         """
         Generates JWT token valid for 24 hours.
