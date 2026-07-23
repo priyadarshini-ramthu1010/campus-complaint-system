@@ -117,6 +117,26 @@ class LoginView(APIView):
                 status_code=status.HTTP_401_UNAUTHORIZED
             )
 
+        # Strict role restriction check
+        expected_role = data.get("role")
+        if expected_role:
+            user_role = user.get("role", "student")
+            if expected_role == "student" and user_role != "student":
+                return standard_error_response(
+                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Student Portal allows only Student accounts.",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+            elif expected_role == "staff" and user_role != "staff":
+                return standard_error_response(
+                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Staff Console allows only Staff accounts.",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+            elif expected_role == "admin" and user_role not in ["admin", "super_admin"]:
+                return standard_error_response(
+                    message=f"Access Denied: '{email}' is a {user_role.upper()} account. The Admin Command Center allows only Admin accounts.",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+
         if user.get("status") == "inactive":
             return standard_error_response(
                 message="Your account has been disabled. Please contact the System Administrator.",

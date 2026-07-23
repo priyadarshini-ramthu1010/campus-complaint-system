@@ -53,7 +53,7 @@ const ManagementLogin = () => {
       localStorage.removeItem('campusfix_remembered_admin_email');
     }
 
-    const result = await login(data.email, data.password);
+    const result = await login(data.email, data.password, 'admin');
     
     if (result.success) {
       const savedUser = JSON.parse(localStorage.getItem('user'));

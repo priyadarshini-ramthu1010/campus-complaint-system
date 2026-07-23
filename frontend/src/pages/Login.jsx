@@ -77,7 +77,7 @@ const Login = ({ initialRole = 'student' }) => {
       localStorage.removeItem('campusfix_remembered_email');
     }
 
-    const result = await login(data.email, data.password);
+    const result = await login(data.email, data.password, activeTab);
     
     if (result.success) {
       const savedUser = JSON.parse(localStorage.getItem('user'));
