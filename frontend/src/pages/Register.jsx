@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { User, Phone, GraduationCap, Calendar, Lock, Eye, EyeOff, Sun, Moon, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
@@ -13,6 +14,7 @@ const Register = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isSubmittingState, setIsSubmittingState] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const emailValue = watch('email');
@@ -105,14 +107,11 @@ const Register = () => {
             <label className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Roll Number</label>
             <input
               type="text"
-              placeholder="STU-2026-0001"
+              placeholder="STU-2026-1001 (Optional)"
               className={`w-full rounded-2xl border bg-slate-50/50 dark:bg-slate-900/60 px-4 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 transition-all duration-200 ${
                 errors.roll_number ? 'border-red-300 focus:ring-red-500/10' : 'border-slate-200/80 dark:border-slate-800 focus:border-blue-500'
               }`}
-              {...register('roll_number', { 
-                required: 'Roll number is required',
-                minLength: { value: 3, message: 'Minimum 3 characters required' }
-              })}
+              {...register('roll_number')}
             />
             {errors.roll_number && <span className="text-[10px] text-red-500 font-semibold pl-1">{errors.roll_number.message}</span>}
           </div>
@@ -132,7 +131,7 @@ const Register = () => {
                 }`}
                 {...register('phone', { 
                   required: 'Phone number is required',
-                  pattern: { value: /^\d{10}$/, message: 'Must be exactly 10 digits' }
+                  pattern: { value: /^\+?\d{9,15}$/, message: 'Valid 9-15 digit phone required' }
                 })}
               />
             </div>
@@ -203,9 +202,9 @@ const Register = () => {
                 <Lock className="h-4.5 w-4.5" />
               </span>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
-                className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
+                className={`w-full rounded-2xl border-2 bg-slate-50 dark:bg-slate-900/90 pl-11 pr-11 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 caret-blue-600 dark:caret-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 ${
                   errors.password ? 'border-red-300 focus:ring-red-500/10' : 'border-slate-200/80 dark:border-slate-800'
                 }`}
                 {...register('password', { 
@@ -213,6 +212,13 @@ const Register = () => {
                   minLength: { value: 6, message: 'Password must be at least 6 characters' }
                 })}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+              </button>
             </div>
             {errors.password && <span className="text-[10px] text-red-500 font-semibold pl-1">{errors.password.message}</span>}
           </div>

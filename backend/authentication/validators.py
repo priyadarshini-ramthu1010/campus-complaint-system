@@ -27,10 +27,8 @@ def validate_registration_data(data):
     elif not re.match(r"^[\w\.\+-]+@[\w\.-]+\.\w+$", email):
         errors["email"] = "Invalid email address format"
 
-    if not roll_number:
-        errors["roll_number"] = "Roll number is required"
-    elif len(roll_number) < 3:
-        errors["roll_number"] = "Roll number must be at least 3 characters"
+    if roll_number and len(roll_number) < 2:
+        errors["roll_number"] = "Roll number must be at least 2 characters"
 
     if not password:
         errors["password"] = "Password is required"

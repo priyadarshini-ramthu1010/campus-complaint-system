@@ -1,3 +1,4 @@
+import random
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from utils.response import standard_success_response, standard_error_response
@@ -24,21 +25,20 @@ class RegisterView(APIView):
         email = data.get("email", "").strip().lower()
         roll_number = data.get("roll_number", "").strip().upper()
 
+        if not roll_number:
+            roll_number = f"STU-2026-{random.randint(1000, 9999)}"
+
         # Check existing email
         if AuthService.get_user_by_email(email):
             return standard_error_response(
                 message="Registration failed",
-                errors={"email": "Email address already registered"},
+                errors={"email": "This email address is already registered. Please log in instead."},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
-        # Check existing roll number
+        # Auto-resolve existing roll number to make registration smooth
         if AuthService.get_user_by_roll_number(roll_number):
-            return standard_error_response(
-                message="Registration failed",
-                errors={"roll_number": "Roll number already registered"},
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+            roll_number = f"{roll_number}-{random.randint(100, 999)}"
 
         try:
             new_user = AuthService.create_student_user(
