@@ -74,6 +74,40 @@ def seed_database(target_db=None):
     users_col.insert_one(admin2_doc)
     print("Seeded Admin 2: admin2@campus.com")
 
+    priya_doc = {
+        "name": "Priyadarshini Ramthu",
+        "email": "priyadarshini@gmail.com",
+        "password": AuthService.hash_password("priyadarshini"),
+        "phone": "9876543211",
+        "department": "Campus Administration",
+        "year": "N/A",
+        "role": "admin",
+        "profile_image": "",
+        "created_at": datetime.datetime.now(datetime.UTC),
+        "updated_at": datetime.datetime.now(datetime.UTC),
+        "created_by": None,
+        "updated_by": None
+    }
+    users_col.insert_one(priya_doc)
+    print("Seeded Admin: priyadarshini@gmail.com")
+
+    chandana_doc = {
+        "name": "Chandana Admin",
+        "email": "chandana@gmail.com",
+        "password": AuthService.hash_password("chandana"),
+        "phone": "9876543212",
+        "department": "Campus Administration",
+        "year": "N/A",
+        "role": "admin",
+        "profile_image": "",
+        "created_at": datetime.datetime.now(datetime.UTC),
+        "updated_at": datetime.datetime.now(datetime.UTC),
+        "created_by": None,
+        "updated_by": None
+    }
+    users_col.insert_one(chandana_doc)
+    print("Seeded Admin: chandana@gmail.com")
+
     # Seed 6 Maintenance Staff with realistic names
     staff_depts = [
         ("Rajesh Kumar (Senior Electrician)", "Electrical Maintenance", "Electrical", "staff@campus.com"),
