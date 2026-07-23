@@ -170,14 +170,14 @@ const AdminManagement = () => {
     }
   };
 
-  // Check RBAC permission for Super Admin
-  if (currentUser && currentUser.role !== 'super_admin') {
+  // Check RBAC permission for Admin / Super Admin
+  if (currentUser && !['admin', 'super_admin'].includes(currentUser.role)) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-slate-900/90 border border-slate-800 rounded-3xl text-center max-w-xl mx-auto my-12 gap-4">
         <ShieldAlert className="h-16 w-16 text-rose-500 animate-pulse" />
-        <h2 className="text-xl font-black text-white">Access Denied — Super Admin Required</h2>
+        <h2 className="text-xl font-black text-white">Access Denied — Administrator Required</h2>
         <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-          The Admin Management module is restricted strictly to Super Administrators. You do not have permission to view or manage admin accounts.
+          The Admin Management module is restricted strictly to Administrators. You do not have permission to view or manage admin accounts.
         </p>
       </div>
     );

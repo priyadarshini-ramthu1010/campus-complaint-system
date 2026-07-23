@@ -32,7 +32,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     { name: 'Students', path: '/admin/students', icon: Users },
     { name: 'Complaints', path: '/admin/complaints', icon: ListTodo },
     { name: 'Staff', path: '/admin/staff', icon: Wrench },
-    ...(isSuperAdmin ? [{ name: 'Admin Management', path: '/admin/admins', icon: ShieldCheck }] : []),
+    { name: 'Admin Management', path: '/admin/admins', icon: ShieldCheck },
     { name: 'Categories', path: '/admin/categories', icon: FolderKanban },
     { name: 'Buildings', path: '/admin/buildings', icon: Building2 },
     { name: 'Departments', path: '/admin/departments', icon: GraduationCap },
