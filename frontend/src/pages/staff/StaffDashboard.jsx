@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
+import api, { getMediaUrl } from '../../services/api';
 import { toast } from 'react-toastify';
+
 import { 
   Bell, 
   Search, 
@@ -602,15 +603,16 @@ const StaffDashboard = () => {
                   {selectedComplaint.before_image && (
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-bold text-slate-400">Before Repair:</span>
-                      <img src={selectedComplaint.before_image} alt="Before" className="h-24 w-36 object-cover rounded-xl border" />
+                      <img src={getMediaUrl(selectedComplaint.before_image)} alt="Before" className="h-24 w-36 object-cover rounded-xl border" />
                     </div>
                   )}
                   {selectedComplaint.after_image && (
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-bold text-slate-400">After Repair:</span>
-                      <img src={selectedComplaint.after_image} alt="After" className="h-24 w-36 object-cover rounded-xl border" />
+                      <img src={getMediaUrl(selectedComplaint.after_image)} alt="After" className="h-24 w-36 object-cover rounded-xl border" />
                     </div>
                   )}
+
                 </div>
               </div>
             )}

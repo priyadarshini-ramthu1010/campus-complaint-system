@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../services/api';
+import api, { getMediaUrl } from '../../services/api';
 import { toast } from 'react-toastify';
+
 import { 
   ListTodo, 
   Search, 
@@ -311,11 +312,16 @@ const StudentMyComplaints = () => {
               </p>
 
               {/* Photo Image Attachment */}
-              {selectedComplaint.image_url && (
+              {(selectedComplaint.image_url || (selectedComplaint.images && selectedComplaint.images.length > 0)) && (
                 <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-56">
-                  <img src={selectedComplaint.image_url} alt="Complaint Issue" className="w-full h-full object-cover" />
+                  <img 
+                    src={selectedComplaint.image_url ? getMediaUrl(selectedComplaint.image_url) : getMediaUrl(selectedComplaint.images[0].image_path)} 
+                    alt="Complaint Issue" 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
               )}
+
             </div>
 
             {/* Meta Grid */}

@@ -295,7 +295,8 @@ const AdminDashboard = () => {
   };
 
   const categories = ["Electrical", "Plumbing", "Internet", "Furniture", "Cleaning", "Laboratory", "Classroom", "Hostel", "Civil", "Water Supply", "Others"];
-  const buildings = ["Main Block", "Science Block", "Library", "Ramanujan Hostel", "Tagore Hostel", "Newton Lab", "Academic Hall"];
+  const buildings = ["Lakshmi Block", "Saraswathi Block", "Srivasa Block", "Shiva Block", "NPN Block", "Industrial Block", "KK Block", "Vinayaka Block", "Annapurna Block", "Research Block"];
+
   const departments = ["System Administration", "Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Chemical"];
 
   return (

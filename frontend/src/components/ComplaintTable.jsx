@@ -2,6 +2,7 @@ import React from 'react';
 import StatusBadge from './StatusBadge';
 import PriorityBadge from './PriorityBadge';
 import { Eye, UserCheck, PlayCircle, ImageIcon } from 'lucide-react';
+import { getMediaUrl } from '../services/api';
 
 const ComplaintTable = ({ complaints, role, onViewDetails, onAssignStaff, onUpdateStatus }) => {
   if (!complaints || complaints.length === 0) {
@@ -56,7 +57,8 @@ const ComplaintTable = ({ complaints, role, onViewDetails, onAssignStaff, onUpda
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
             {complaints.map((comp) => {
               const hasPhoto = comp.images && comp.images.length > 0;
-              const photoUrl = hasPhoto ? `http://127.0.0.1:8000/media/${comp.images[0].image_path}` : null;
+              const photoUrl = hasPhoto ? getMediaUrl(comp.images[0].image_path) : null;
+
 
               return (
                 <tr key={comp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors duration-150">

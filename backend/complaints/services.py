@@ -14,6 +14,30 @@ def to_object_id(val):
     hex_24 = hashlib.md5(val_str.encode('utf-8')).hexdigest()[:24]
     return ObjectId(hex_24)
 
+def sanitize_mongo_doc(doc):
+    """
+    Recursively converts all ObjectId instances to string and datetime instances to ISO format strings.
+    """
+    if not doc:
+        return doc
+    if isinstance(doc, list):
+        return [sanitize_mongo_doc(item) for item in doc]
+    if isinstance(doc, dict):
+        cleaned = {}
+        for k, v in doc.items():
+            if isinstance(v, ObjectId):
+                cleaned[k] = str(v)
+            elif isinstance(v, datetime.datetime):
+                cleaned[k] = v.isoformat()
+            elif isinstance(v, (dict, list)):
+                cleaned[k] = sanitize_mongo_doc(v)
+            else:
+                cleaned[k] = v
+        if "_id" in cleaned and "id" not in cleaned:
+            cleaned["id"] = str(cleaned["_id"])
+        return cleaned
+    return doc
+
 class ComplaintService:
     @staticmethod
     def generate_complaint_number():
@@ -99,18 +123,7 @@ class ComplaintService:
             "updated_at": now
         })
 
-        new_comp["id"] = str(complaint_id)
-        new_comp["_id"] = str(complaint_id)
-        new_comp["student_id"] = str(new_comp["student_id"])
-        new_comp["created_by"] = str(new_comp["created_by"])
-        new_comp["updated_by"] = str(new_comp["updated_by"])
-        for img in new_comp["images"]:
-            if isinstance(img.get("uploaded_at"), datetime.datetime):
-                img["uploaded_at"] = img["uploaded_at"].isoformat()
-            if img.get("uploaded_by"):
-                img["uploaded_by"] = str(img["uploaded_by"])
-
-        return new_comp
+        return sanitize_mongo_doc(new_comp)
 
     @staticmethod
     def list_complaints(user_id, user_role, search="", filters=None, sort_by="created_at", sort_order="desc", page=1, limit=10):
@@ -162,32 +175,7 @@ class ComplaintService:
         total_count = complaints_col.count_documents(query)
         cursor = complaints_col.find(query).sort(sort_by, multiplier).skip(skip).limit(limit)
 
-        results = []
-        for doc in cursor:
-            doc["id"] = str(doc["_id"])
-            doc["_id"] = str(doc["_id"])
-            doc["student_id"] = str(doc["student_id"])
-            if doc.get("assigned_staff_id"):
-                doc["assigned_staff_id"] = str(doc["assigned_staff_id"])
-            if doc.get("resolved_by"):
-                doc["resolved_by"] = str(doc["resolved_by"])
-            if doc.get("created_by"):
-                doc["created_by"] = str(doc["created_by"])
-            if doc.get("updated_by"):
-                doc["updated_by"] = str(doc["updated_by"])
-            
-            # Formats dates
-            for date_field in ["created_at", "updated_at", "resolution_date"]:
-                if doc.get(date_field) and isinstance(doc[date_field], datetime.datetime):
-                    doc[date_field] = doc[date_field].isoformat()
-            
-            for img in doc.get("images", []):
-                if img.get("uploaded_at") and isinstance(img["uploaded_at"], datetime.datetime):
-                    img["uploaded_at"] = img["uploaded_at"].isoformat()
-                if img.get("uploaded_by"):
-                    img["uploaded_by"] = str(img["uploaded_by"])
-
-            results.append(doc)
+        results = [sanitize_mongo_doc(doc) for doc in cursor]
 
         total_pages = (total_count + limit - 1) // limit
 
@@ -219,56 +207,17 @@ class ComplaintService:
         if user_role == "staff" and str(complaint.get("assigned_staff_id")) != user_id:
             return "forbidden"
 
-        # Format details
-        complaint["id"] = str(complaint["_id"])
-        complaint["_id"] = str(complaint["_id"])
-        complaint["student_id"] = str(complaint["student_id"])
-        if complaint.get("assigned_staff_id"):
-            complaint["assigned_staff_id"] = str(complaint["assigned_staff_id"])
-        if complaint.get("resolved_by"):
-            complaint["resolved_by"] = str(complaint["resolved_by"])
-        if complaint.get("created_by"):
-            complaint["created_by"] = str(complaint["created_by"])
-        if complaint.get("updated_by"):
-            complaint["updated_by"] = str(complaint["updated_by"])
-        
-        for df in ["created_at", "updated_at", "resolution_date"]:
-            if complaint.get(df) and isinstance(complaint[df], datetime.datetime):
-                complaint[df] = complaint[df].isoformat()
-
-        for img in complaint.get("images", []):
-            if img.get("uploaded_at") and isinstance(img["uploaded_at"], datetime.datetime):
-                img["uploaded_at"] = img["uploaded_at"].isoformat()
-            if img.get("uploaded_by"):
-                img["uploaded_by"] = str(img["uploaded_by"])
-
         # Timeline
         history_col = get_collection("status_history")
         histories = list(history_col.find({"complaint_id": complaint_oid}).sort("updated_at", 1))
-        timeline = []
-        for h in histories:
-            h["id"] = str(h["_id"])
-            h["_id"] = str(h["_id"])
-            h["complaint_id"] = str(h["complaint_id"])
-            h["updated_by"] = str(h["updated_by"])
-            h["updated_at"] = h["updated_at"].isoformat()
-            timeline.append(h)
-        complaint["timeline"] = timeline
+        complaint["timeline"] = sanitize_mongo_doc(histories)
 
         # Feedback
         feedback_col = get_collection("feedback")
         fb = feedback_col.find_one({"complaint_id": complaint_oid})
-        if fb:
-            fb["id"] = str(fb["_id"])
-            fb["_id"] = str(fb["_id"])
-            fb["complaint_id"] = str(fb["complaint_id"])
-            fb["student_id"] = str(fb["student_id"])
-            fb["created_at"] = fb["created_at"].isoformat()
-            complaint["feedback"] = fb
-        else:
-            complaint["feedback"] = None
+        complaint["feedback"] = sanitize_mongo_doc(fb) if fb else None
 
-        return complaint
+        return sanitize_mongo_doc(complaint)
 
     @staticmethod
     def assign_staff(complaint_id, staff_id, remarks, admin_id, admin_name):

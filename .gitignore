@@ -5,9 +5,15 @@ __pycache__/
 *.sqlite3
 backend/db.sqlite3
 .env
+backend/.env
+frontend/.env
 venv/
 env/
 .venv/
+staticfiles/
+backend/staticfiles/
+media/
+backend/media/
 
 # Node / React
 node_modules/
@@ -20,3 +26,4 @@ frontend/dist/
 *.log
 mongod.log
 db_data/
+

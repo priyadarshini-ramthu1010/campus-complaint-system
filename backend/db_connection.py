@@ -6,39 +6,77 @@ from dotenv import load_dotenv
 # Load .env variables
 load_dotenv()
 
-MONGO_URIS = [
-    os.getenv("MONGO_URI", "mongodb+srv://darshiniramthu_db_user:2005@cluster0.289biyt.mongodb.net/?appName=Cluster0"),
-    "mongodb+srv://Darshini:2005@cluster0.mqrxkbv.mongodb.net/?appName=Cluster0"
-]
+mongo_uri = os.getenv("MONGO_URI")
 
 client = None
 db = None
 
-for uri in MONGO_URIS:
+if mongo_uri:
+    # 1. Try certifi SSL CA bundle first
     try:
-        # Try without certifi first (avoids Windows Python TLS alert bug)
-        c = MongoClient(uri, tlsAllowInvalidCertificates=True, serverSelectionTimeoutMS=4000)
-        c.admin.command('ismaster')
+        c = MongoClient(mongo_uri, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=4000)
+        c.admin.command('ping')
         client = c
         db = client['campus_complaints']
-        print(f"Connected successfully to MongoDB Atlas database!")
-        break
-    except Exception as e:
+        print("Connected successfully to MongoDB Atlas database via certifi!")
+    except Exception:
+        # 2. Try tlsAllowInvalidCertificates fallback
         try:
-            # Try with certifi fallback
-            c = MongoClient(uri, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=4000)
-            c.admin.command('ismaster')
+            c = MongoClient(mongo_uri, tlsAllowInvalidCertificates=True, serverSelectionTimeoutMS=4000)
+            c.admin.command('ping')
             client = c
             db = client['campus_complaints']
-            print(f"Connected successfully to MongoDB Atlas database with certifi!")
-            break
-        except Exception:
-            continue
+            print("Connected successfully to MongoDB Atlas database via TLS fallback!")
+        except Exception as e:
+            print(f"MongoDB connection notice: {e}")
 
 if db is None:
-    # Final fallback client
-    client = MongoClient(MONGO_URIS[0], tlsAllowInvalidCertificates=True)
-    db = client['campus_complaints']
+    # Fallback to local MongoDB or persistent mongomock store
+    try:
+        c = MongoClient("mongodb://127.0.0.1:27017/campus_complaints", serverSelectionTimeoutMS=2000)
+        c.admin.command('ping')
+        client = c
+        db = client['campus_complaints']
+    except Exception:
+        import mongomock
+        import pickle
+        from pathlib import Path
+
+        db_dir = Path(__file__).resolve().parent / "db_data"
+        db_dir.mkdir(exist_ok=True)
+        store_file = db_dir / "local_db.pkl"
+
+        client = mongomock.MongoClient()
+        db = client['campus_complaints']
+
+        # Load persisted collections if store file exists
+        if store_file.exists():
+            try:
+                with open(store_file, "rb") as f:
+                    saved_data = pickle.load(f)
+                    for col_name, docs in saved_data.items():
+                        if docs:
+                            db[col_name].insert_many(docs)
+                print(f"Loaded persistent local MongoDB mock state from {store_file}")
+            except Exception as e:
+                print(f"Notice: Could not load local_db.pkl: {e}")
+
+        # Helper to persist database state
+        def persist_db():
+            try:
+                data_to_save = {}
+                for col_name in db.list_collection_names():
+                    data_to_save[col_name] = list(db[col_name].find())
+                with open(store_file, "wb") as f:
+                    pickle.dump(data_to_save, f)
+            except Exception as e:
+                print(f"Notice: Could not persist local_db.pkl: {e}")
+
+        # Attach persist method to db
+        db.persist_db = persist_db
+        print("Using persistent local MongoDB database.")
+
+
 
 def get_collection(name):
     """
@@ -48,8 +86,9 @@ def get_collection(name):
 
 def check_connection():
     try:
-        client.admin.command('ismaster')
+        client.admin.command('ping')
         return True
     except Exception as e:
         print(f"MongoDB connection check failed: {e}")
         return False
+

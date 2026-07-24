@@ -4,13 +4,18 @@ import { toast } from 'react-toastify';
 
 const AdminBuildings = () => {
   const [buildings] = useState([
-    { id: '1', name: 'Tech Block A', code: 'TBA', floors: 4, blocks: 2, activeIssues: 8, status: 'Active' },
-    { id: '2', name: 'Tech Block B', code: 'TBB', floors: 4, blocks: 2, activeIssues: 5, status: 'Active' },
-    { id: '3', name: 'Hostel Complex 1', code: 'HC1', floors: 6, blocks: 4, activeIssues: 18, status: 'Active' },
-    { id: '4', name: 'Science & Chemical Block', code: 'SCB', floors: 3, blocks: 1, activeIssues: 3, status: 'Active' },
-    { id: '5', name: 'Central Library', code: 'LIB', floors: 3, blocks: 1, activeIssues: 2, status: 'Active' },
-    { id: '6', name: 'Main Admin Building', code: 'MAB', floors: 3, blocks: 1, activeIssues: 1, status: 'Active' }
+    { id: '1', name: 'Lakshmi Block', code: 'LB', floors: 4, blocks: 1, activeIssues: 4, status: 'Active' },
+    { id: '2', name: 'Saraswathi Block', code: 'SB', floors: 4, blocks: 1, activeIssues: 6, status: 'Active' },
+    { id: '3', name: 'Srivasa Block', code: 'SVB', floors: 5, blocks: 1, activeIssues: 3, status: 'Active' },
+    { id: '4', name: 'Shiva Block', code: 'SHB', floors: 4, blocks: 1, activeIssues: 5, status: 'Active' },
+    { id: '5', name: 'NPN Block', code: 'NPN', floors: 3, blocks: 1, activeIssues: 2, status: 'Active' },
+    { id: '6', name: 'Industrial Block', code: 'IND', floors: 3, blocks: 1, activeIssues: 7, status: 'Active' },
+    { id: '7', name: 'KK Block', code: 'KKB', floors: 4, blocks: 1, activeIssues: 3, status: 'Active' },
+    { id: '8', name: 'Vinayaka Block', code: 'VNB', floors: 4, blocks: 1, activeIssues: 4, status: 'Active' },
+    { id: '9', name: 'Annapurna Block', code: 'APB', floors: 3, blocks: 1, activeIssues: 2, status: 'Active' },
+    { id: '10', name: 'Research Block', code: 'RES', floors: 5, blocks: 1, activeIssues: 5, status: 'Active' }
   ]);
+
 
   const [searchVal, setSearchVal] = useState('');
 

@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+
+export const getMediaUrl = (imagePath) => {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
+    return imagePath;
+  }
+  const base = API_BASE_URL.replace(/\/api\/?$/, '');
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `${base}/media${cleanPath.startsWith('/complaints/') ? '' : ''}${cleanPath}`;
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -42,7 +52,7 @@ api.interceptors.response.use(
       if (error.response.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        // Let application react toauth removal, page reload handles redirect if protected
+        // Let application react to auth removal
       }
     } else if (error.request) {
       message = 'Cannot connect to server. Please check if backend is running.';
@@ -57,3 +67,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

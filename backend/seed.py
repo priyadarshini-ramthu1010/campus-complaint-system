@@ -2,14 +2,13 @@ import os
 import datetime
 import bcrypt
 import random
-from pymongo import MongoClient, ASCENDING
+from pymongo import ASCENDING
 from dotenv import load_dotenv
+from db_connection import db
+from authentication.services import AuthService
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://darshiniramthu_db_user:2005@cluster0.289biyt.mongodb.net/?appName=Cluster0")
-client = MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True)
-db = client['campus_complaints']
 
 def seed_database(target_db=None):
     active_db = target_db if target_db is not None else db
@@ -168,7 +167,8 @@ def seed_database(target_db=None):
 
     # Seed 50 Sample Complaints
     categories = ["Electrical", "Plumbing", "Internet", "Furniture", "Cleaning", "Laboratory", "Classroom", "Hostel", "Civil", "Water Supply", "Others"]
-    buildings = ["Main Block", "Science Block", "Library", "Ramanujan Hostel", "Tagore Hostel", "Newton Lab", "Academic Hall"]
+    buildings = ["Lakshmi Block", "Saraswathi Block", "Srivasa Block", "Shiva Block", "NPN Block", "Industrial Block", "KK Block", "Vinayaka Block", "Annapurna Block", "Research Block"]
+
     priorities = ["Low", "Medium", "High", "Emergency"]
     statuses = ["Pending", "Assigned", "In Progress", "Resolved", "Rejected"]
     
@@ -340,3 +340,6 @@ def seed_database(target_db=None):
 
 if __name__ == '__main__':
     seed_database()
+
+
+

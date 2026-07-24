@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import api, { getMediaUrl } from '../../services/api';
 import { toast } from 'react-toastify';
+
 import { 
   ListTodo, 
   Search, 
@@ -517,7 +518,7 @@ const AdminComplaints = () => {
               <div className="flex flex-col gap-1.5 bg-slate-900 p-3 rounded-xl border border-slate-800">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Before Repair Photo</span>
                 {selectedComplaint.before_image ? (
-                  <img src={selectedComplaint.before_image} alt="Before" className="h-32 w-full object-cover rounded-lg border border-slate-800" />
+                  <img src={getMediaUrl(selectedComplaint.before_image)} alt="Before" className="h-32 w-full object-cover rounded-lg border border-slate-800" />
                 ) : (
                   <div className="h-32 bg-slate-950 rounded-lg flex items-center justify-center text-[10px] text-slate-600 font-bold">No Image Provided</div>
                 )}
@@ -526,10 +527,11 @@ const AdminComplaints = () => {
               <div className="flex flex-col gap-1.5 bg-slate-900 p-3 rounded-xl border border-slate-800">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">After Repair Photo</span>
                 {selectedComplaint.after_image ? (
-                  <img src={selectedComplaint.after_image} alt="After" className="h-32 w-full object-cover rounded-lg border border-slate-800" />
+                  <img src={getMediaUrl(selectedComplaint.after_image)} alt="After" className="h-32 w-full object-cover rounded-lg border border-slate-800" />
                 ) : (
                   <div className="h-32 bg-slate-950 rounded-lg flex items-center justify-center text-[10px] text-slate-600 font-bold">No Image Provided</div>
                 )}
+
               </div>
             </div>
 
